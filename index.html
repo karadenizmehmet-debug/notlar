@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Notlar</title>
+<meta name="description" content="Not al, liste tut, hatırlatma kur. Çevrimdışı çalışır.">
+<meta name="author" content="Mehmet Karadeniz, 2026-2027">
+<meta name="theme-color" content="#F2F5F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E191C" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F5; --surface:#FFFFFF; --ink:#13262B; --ink-2:#4A5E63; --ink-3:#8A9A9E;
+  --line:#DCE4E5; --accent:#0F7C80; --accent-ink:#FFFFFF; --cobalt:#2B4C9B; --danger:#C0402B;
+  --c-none:#FFFFFF; --c-turkuaz:#D5F0EE; --c-kobalt:#DCE4F7; --c-cini:#F8DDD6; --c-safran:#F9EBC4; --c-adacayi:#E1EBDA; --c-erik:#ECDDF0;
+  --e-none:#DCE4E5; --e-turkuaz:#0F7C80; --e-kobalt:#2B4C9B; --e-cini:#C0402B; --e-safran:#C99316; --e-adacayi:#5E8A4E; --e-erik:#8A4C99;
+  --shadow:0 1px 2px rgba(19,38,43,.06), 0 4px 14px rgba(19,38,43,.06);
+  --r-lg:22px; --r-md:16px; --r-sm:10px;
+  --font-d:"Bricolage Grotesque", system-ui, sans-serif;
+  --font-b:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0E191C; --surface:#16252A; --ink:#E6EEEF; --ink-2:#A6B7BA; --ink-3:#6C7F83;
+  --line:#25373C; --accent:#3FB8B4; --accent-ink:#06211F; --cobalt:#8EA8F0; --danger:#F07A63;
+  --c-none:#16252A; --c-turkuaz:#123A3B; --c-kobalt:#1C2847; --c-cini:#3E2120; --c-safran:#3A3118; --c-adacayi:#1F3020; --c-erik:#33223A;
+  --e-none:#25373C; --e-turkuaz:#3FB8B4; --e-kobalt:#8EA8F0; --e-cini:#F07A63; --e-safran:#E8BC4A; --e-adacayi:#8CBF78; --e-erik:#C99AD6;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--font-b);-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;overscroll-behavior-y:none}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:8px}
+svg{display:block}
+.ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hidden{display:none!important}
+
+/* ---------- header ---------- */
+header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(var(--safe-t) + 14px) 18px 10px}
+.hello{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.hello h1{font:800 34px/1.02 var(--font-d);letter-spacing:-.02em;margin:0}
+.hello .day{color:var(--ink-2);font-size:14px;margin:0 0 4px}
+.hello .count{color:var(--ink-3);font-size:13px;white-space:nowrap;margin-bottom:4px}
+.tile{height:6px;margin:14px 0 12px;border-radius:3px;
+  background:
+   radial-gradient(circle at 6px 3px,var(--e-turkuaz) 2.2px,transparent 2.6px) 0 0/24px 6px,
+   radial-gradient(circle at 18px 3px,var(--e-kobalt) 2.2px,transparent 2.6px) 0 0/24px 6px;
+  opacity:.55}
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 8px 0 16px;height:48px}
+.search input{flex:1;border:0;background:none;outline:none;height:100%;min-width:0}
+.search input::placeholder{color:var(--ink-3)}
+.iconbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink-2);flex:none}
+.iconbtn:active{background:var(--line)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:14px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* ---------- list ---------- */
+main{padding:6px 14px calc(var(--safe-b) + 150px)}
+.section-t{font:600 13px/1 var(--font-b);color:var(--ink-3);margin:18px 6px 10px;letter-spacing:.01em}
+.grid{display:flex;gap:10px;align-items:flex-start}
+.grid .col{flex:1;min-width:0}
+@media (min-width:720px){main,header.top{max-width:980px;margin:0 auto}}
+.card{margin:0 0 10px;background:var(--c-none);border:1px solid var(--e-none);border-radius:var(--r-md);padding:14px 14px 12px;position:relative;display:block;width:100%;text-align:left;overflow:hidden;transition:transform .12s ease}
+.card:active{transform:scale(.98)}
+.card[data-c]:not([data-c="none"]){border-color:transparent}
+.card h3{font:700 17px/1.25 var(--font-d);margin:0 0 6px;letter-spacing:-.005em;word-break:break-word}
+.card p{margin:0;color:var(--ink-2);font-size:14.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:9;-webkit-box-orient:vertical;overflow:hidden}
+.card ul{list-style:none;margin:0;padding:0;font-size:14.5px;color:var(--ink-2)}
+.card li{display:flex;gap:8px;align-items:flex-start;margin:3px 0}
+.card li .bx{width:15px;height:15px;border:1.6px solid var(--ink-3);border-radius:4px;flex:none;margin-top:3px}
+.card li.done{text-decoration:line-through;color:var(--ink-3)}
+.card li.done .bx{background:var(--ink-3)}
+.card .more{color:var(--ink-3);font-size:13px;margin-top:4px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--ink-2)}
+.pill.alarm{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.pill.late{background:color-mix(in srgb,var(--danger) 15%,transparent);color:var(--danger)}
+.pill svg{width:13px;height:13px;stroke-width:2.2}
+.pin{position:absolute;top:10px;right:10px;color:var(--ink-3)}
+.pin svg{width:16px;height:16px}
+.card.has-pin h3{padding-right:20px}
+
+.empty{text-align:center;padding:70px 30px;color:var(--ink-2)}
+.empty .art{width:120px;height:120px;margin:0 auto 18px}
+.empty h2{font:700 22px/1.2 var(--font-d);color:var(--ink);margin:0 0 6px}
+.empty p{margin:0;font-size:15px}
+
+/* reminders view */
+.rem{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;width:100%;text-align:left}
+.rem .when{flex:none;width:58px;text-align:center;border-radius:12px;padding:6px 0;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.rem .when b{display:block;font:800 22px/1 var(--font-d)}
+.rem .when span{font-size:12px;font-weight:600}
+.rem .when.late{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
+.rem .tx{flex:1;min-width:0}
+.rem .tx strong{display:block;font:700 16px/1.25 var(--font-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rem .tx small{color:var(--ink-2);font-size:13.5px}
+
+/* settings */
+.set{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-bottom:14px}
+.row{display:flex;align-items:center;gap:14px;padding:14px 16px;width:100%;text-align:left;border-top:1px solid var(--line);min-height:56px}
+.row:first-child{border-top:0}
+.row .tx{flex:1}
+.row .tx small{display:block;color:var(--ink-3);font-size:13px}
+.row.danger{color:var(--danger)}
+.seg{display:flex;background:var(--bg);border-radius:999px;padding:3px;gap:2px}
+.seg button{padding:6px 12px;border-radius:999px;font-size:13.5px;color:var(--ink-2);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.about{text-align:center;color:var(--ink-3);font-size:13px;padding:10px 0 20px}
+
+/* ---------- bottom nav + fab ---------- */
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 6px calc(var(--safe-b) + 6px)}
+nav.bottom button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--ink-3);font-size:12px;font-weight:600;border-radius:14px;position:relative}
+nav.bottom button[aria-current="page"]{color:var(--ink)}
+nav.bottom button[aria-current="page"] .ico{stroke:var(--accent);stroke-width:2.2}
+nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;height:17px;border-radius:9px;background:var(--danger);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 4px}
+.fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 84px);z-index:31;height:60px;padding:0 22px 0 18px;border-radius:20px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;gap:8px;font:700 16px var(--font-d);box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 40%,transparent);transition:transform .15s ease}
+.fab:active{transform:scale(.95)}
+.fab .ico{stroke-width:2.4}
+.fab2{position:fixed;right:18px;bottom:calc(var(--safe-b) + 154px);z-index:31;width:48px;height:48px;border-radius:16px;background:var(--surface);color:var(--accent);border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow)}
+
+/* ---------- editor ---------- */
+.editor{position:fixed;inset:0;z-index:50;background:var(--ed-bg,var(--bg));display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1),background .2s}
+.editor{visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),background .2s,visibility 0s .28s}
+.editor.open{transform:none;visibility:visible;transition:transform .28s cubic-bezier(.2,.8,.2,1),background .2s}
+.ed-top{display:flex;align-items:center;gap:4px;padding:calc(var(--safe-t) + 8px) 8px 4px}
+.ed-top .sp{flex:1}
+.ed-top .saved{font-size:12.5px;color:var(--ink-3);margin-right:6px}
+.ed-body{flex:1;overflow-y:auto;padding:4px 20px 20px}
+.ed-title{width:100%;border:0;background:none;outline:none;font:800 28px/1.15 var(--font-d);letter-spacing:-.015em;padding:6px 0;resize:none;overflow:hidden}
+.ed-title::placeholder,.ed-text::placeholder{color:var(--ink-3)}
+.ed-text{width:100%;border:0;background:none;outline:none;font-size:17px;line-height:1.6;resize:none;min-height:40vh;padding:6px 0 30px;overflow:hidden}
+.ed-info{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.ed-info .pill{cursor:pointer}
+.ed-info .pill .x{opacity:.6;margin-left:2px}
+.cl{list-style:none;margin:6px 0 0;padding:0}
+.cl li{display:flex;align-items:flex-start;gap:10px;padding:4px 0}
+.cl .cb{width:22px;height:22px;border-radius:7px;border:2px solid var(--ink-3);flex:none;margin-top:4px;display:grid;place-items:center}
+.cl .cb svg{width:14px;height:14px;stroke:var(--accent-ink);stroke-width:3;opacity:0}
+.cl li.done .cb{background:var(--accent);border-color:var(--accent)}
+.cl li.done .cb svg{opacity:1}
+.cl li.done textarea{text-decoration:line-through;color:var(--ink-3)}
+.cl textarea{flex:1;border:0;background:none;outline:none;resize:none;font-size:17px;line-height:1.5;padding:2px 0;overflow:hidden;min-height:30px}
+.cl .del{color:var(--ink-3);width:32px;height:32px;display:grid;place-items:center;flex:none}
+.cl .del svg{width:18px;height:18px}
+.cl-add{display:flex;align-items:center;gap:10px;color:var(--ink-2);padding:10px 0;font-weight:500}
+.done-h{font-size:13px;color:var(--ink-3);margin:14px 0 2px;font-weight:600}
+.ed-bar{display:flex;align-items:center;gap:2px;padding:6px 8px calc(var(--safe-b) + 6px);border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
+.ed-bar .sp{flex:1}
+.ed-bar .stamp{font-size:12px;color:var(--ink-3);padding-right:8px}
+.iconbtn.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.iconbtn.rec{color:#fff;background:var(--danger);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--danger) 25%,transparent)}}
+
+/* ---------- sheets ---------- */
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(8,18,20,.42);opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 20px calc(var(--safe-b) + 20px);transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);max-height:88dvh;overflow-y:auto}
+.sheet{visibility:hidden;transition:transform .26s cubic-bezier(.2,.8,.2,1),visibility 0s .26s}
+.sheet.open{transform:none;visibility:visible;transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:720px){.sheet{max-width:520px;margin:0 auto}}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+.sheet h2{font:700 22px/1.2 var(--font-d);margin:0 0 4px}
+.sheet .sub{color:var(--ink-2);font-size:14px;margin:0 0 16px}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.quick button{background:var(--bg);border-radius:var(--r-sm);padding:12px;text-align:left;border:1.5px solid transparent}
+.quick button b{display:block;font-weight:600;font-size:15px}
+.quick button span{font-size:13px;color:var(--ink-2)}
+.quick button[aria-pressed="true"]{border-color:var(--accent)}
+.field{display:block;margin-bottom:12px}
+.field span{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.field input,.field select{width:100%;height:50px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--bg);padding:0 14px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.btns{display:flex;gap:10px;margin-top:8px}
+.btn{flex:1;height:52px;border-radius:16px;font-weight:600;font-size:16px;background:var(--bg);color:var(--ink)}
+.btn.pri{background:var(--accent);color:var(--accent-ink)}
+.btn.warn{color:var(--danger)}
+.btn:active{transform:scale(.98)}
+.cal-links{display:flex;gap:8px;margin-top:12px}
+.cal-links button{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;font-size:13.5px;font-weight:600;color:var(--cobalt);padding:10px;border-radius:12px;background:color-mix(in srgb,var(--cobalt) 10%,transparent)}
+.hint{font-size:13px;color:var(--ink-3);margin:10px 0 0;line-height:1.45}
+.swatches{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 4px}
+.sw{width:46px;height:46px;border-radius:50%;border:2px solid var(--e-none);display:grid;place-items:center}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--ink)}
+.sw svg{width:18px;height:18px;stroke:var(--ink-2)}
+.taglist{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.menu .row{border-top:0;padding:14px 4px;border-radius:12px}
+.menu .row:active{background:var(--bg)}
+
+/* alarm ring */
+.ring{position:fixed;inset:0;z-index:80;background:var(--accent);color:var(--accent-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+.ring .bell{width:84px;height:84px;margin-bottom:22px;animation:shake 1s ease-in-out infinite}
+.ring .bell .ico{width:84px;height:84px;stroke-width:1.4}
+@keyframes shake{0%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-4deg)}}
+.ring h2{font:800 34px/1.1 var(--font-d);margin:0 0 8px;max-width:16ch;word-break:break-word}
+.ring p{margin:0 0 34px;opacity:.85;font-size:16px;max-width:30ch;white-space:pre-wrap}
+.ring .btns{width:100%;max-width:360px;flex-direction:column}
+.ring .btn{flex:none;background:rgba(255,255,255,.18);color:inherit}
+.ring .btn.pri{background:var(--accent-ink);color:var(--accent)}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 160px);transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 16px 12px 18px;border-radius:14px;font-size:14.5px;z-index:90;opacity:0;pointer-events:none;transition:.2s;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{color:var(--accent);font-weight:700;filter:brightness(1.4)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10h14V9M10 13h4"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-rows" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="5" width="4" height="4" rx="1"/><path d="M11 7h9M11 16h9"/><rect x="4" y="14" width="4" height="4" rx="1"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1.1-1.5-1.1-2.6 0-1 .8-1.7 1.8-1.7h2.2A4.3 4.3 0 0 0 21 10.7C21 6.4 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.4"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.2 10.8 7.6-3.6M8.2 13.2l7.6 3.6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8L4 8.5"/><path d="M4 4v4.5h4.5"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  </defs>
+</svg>
+
+<header class="top" id="top">
+  <div class="hello">
+    <div>
+      <p class="day" id="today"></p>
+      <h1 id="viewTitle">Notlar</h1>
+    </div>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="tile" aria-hidden="true"></div>
+  <div id="searchWrap">
+    <label class="search">
+      <svg class="ico" style="color:var(--ink-3)"><use href="#i-search"/></svg>
+      <input id="q" type="search" placeholder="Notlarda ara" autocomplete="off" enterkeyhint="search" aria-label="Notlarda ara">
+      <button class="iconbtn" id="viewToggle" aria-label="Görünümü değiştir"><svg class="ico"><use href="#i-rows"/></svg></button>
+    </label>
+    <div class="chips" id="chips" role="toolbar" aria-label="Etiket filtresi"></div>
+  </div>
+</header>
+
+<main id="main" aria-live="polite"></main>
+
+<button class="fab2" id="fabList" aria-label="Yeni liste"><svg class="ico"><use href="#i-list"/></svg></button>
+<button class="fab" id="fab"><svg class="ico"><use href="#i-plus"/></svg>Yeni not</button>
+
+<nav class="bottom" aria-label="Bölümler">
+  <button data-view="notes" aria-current="page"><svg class="ico"><use href="#i-note"/></svg>Notlar</button>
+  <button data-view="reminders"><svg class="ico"><use href="#i-bell"/></svg>Hatırlatmalar<span class="badge hidden" id="badge"></span></button>
+  <button data-view="archive"><svg class="ico"><use href="#i-archive"/></svg>Arşiv</button>
+  <button data-view="settings"><svg class="ico"><use href="#i-gear"/></svg>Ayarlar</button>
+</nav>
+
+<!-- editor -->
+<section class="editor" id="editor" aria-label="Not düzenleyici" aria-hidden="true">
+  <div class="ed-top">
+    <button class="iconbtn" id="edBack" aria-label="Geri"><svg class="ico"><use href="#i-back"/></svg></button>
+    <span class="sp"></span>
+    <span class="saved" id="edSaved"></span>
+    <button class="iconbtn" id="edPin" aria-label="Sabitle"><svg class="ico"><use href="#i-pin"/></svg></button>
+    <button class="iconbtn" id="edAlarm" aria-label="Hatırlatma kur"><svg class="ico"><use href="#i-bell"/></svg></button>
+    <button class="iconbtn" id="edArchive" aria-label="Arşivle"><svg class="ico"><use href="#i-archive"/></svg></button>
+  </div>
+  <div class="ed-body" id="edBody">
+    <textarea class="ed-title" id="edTitle" rows="1" placeholder="Başlık" aria-label="Başlık" enterkeyhint="next"></textarea>
+    <div class="ed-info" id="edInfo"></div>
+    <textarea class="ed-text" id="edText" placeholder="Not yaz…" aria-label="Not"></textarea>
+    <div id="edList" class="hidden"></div>
+  </div>
+  <div class="ed-bar">
+    <button class="iconbtn" id="edColor" aria-label="Renk"><svg class="ico"><use href="#i-palette"/></svg></button>
+    <button class="iconbtn" id="edCheck" aria-label="Liste moduna geç"><svg class="ico"><use href="#i-list"/></svg></button>
+    <button class="iconbtn" id="edTag" aria-label="Etiket"><svg class="ico"><use href="#i-tag"/></svg></button>
+    <button class="iconbtn" id="edMic" aria-label="Sesle yaz"><svg class="ico"><use href="#i-mic"/></svg></button>
+    <span class="sp"></span>
+    <span class="stamp" id="edStamp"></span>
+    <button class="iconbtn" id="edMore" aria-label="Diğer"><svg class="ico"><use href="#i-more"/></svg></button>
+  </div>
+</section>
+
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true"></section>
+<div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="toastBtn" class="hidden"></button></div>
+
+<script>
+'use strict';
+/* Notlar — Mehmet Karadeniz, 2026-2027 */
+const $ = s => document.querySelector(s);
+const KEY = 'notlar.v1', SKEY = 'notlar.settings';
+const COLORS = [['none','Renksiz'],['turkuaz','Turkuaz'],['kobalt','Kobalt'],['cini','Çini kırmızısı'],['safran','Safran'],['adacayi','Adaçayı'],['erik','Erik']];
+const REPEAT = {none:'Tekrar yok',daily:'Her gün',weekdays:'Hafta içi her gün',weekly:'Her hafta',monthly:'Her ay',yearly:'Her yıl'};
+const DAY = 864e5;
+
+/* ---------- storage ---------- */
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch { toast('Kaydedilemedi: depolama dolu olabilir'); } };
+const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch {} };
+let notes = load(KEY, null);
+const S = Object.assign({theme:'auto', layout:'grid'}, load(SKEY, {}));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+if (!notes) {
+  const now = Date.now();
+  notes = [
+    {id:uid(), type:'text', title:'Notlar’a hoş geldin', body:'Sağ alttaki düğmeyle yeni not aç. Not yazarken kaydetmeye gerek yok, her harf anında saklanır.\n\nZil simgesiyle hatırlatma kur, palet simgesiyle rengini seç, mikrofona dokunup sesle yaz.', color:'turkuaz', pinned:true, tags:[], items:[], reminder:null, archived:false, trashed:null, created:now, updated:now},
+    {id:uid(), type:'list', title:'Bu hafta', body:'', color:'safran', pinned:false, tags:['okul'], items:[
+      {id:uid(), text:'Yazılı kâğıtlarını oku', done:false},
+      {id:uid(), text:'Zil sistemini kontrol et', done:true},
+      {id:uid(), text:'Veli toplantısı notları', done:false}], reminder:null, archived:false, trashed:null, created:now-1000, updated:now-1000}
+  ];
+  persist();
+}
+
+/* ---------- state ---------- */
+let depth = 0, skipPop = 0;
+const pushNav = () => history.pushState({d: ++depth}, '');
+let view = 'notes', tagFilter = null, query = '', editing = null, lastTrashed = null;
+
+/* ---------- theme ---------- */
+const mq = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme() {
+  const dark = S.theme === 'dark' || (S.theme === 'auto' && mq.matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  document.querySelectorAll('meta[name=theme-color]').forEach(m => m.content = dark ? '#0E191C' : '#F2F5F5');
+}
+mq.addEventListener?.('change', applyTheme);
+applyTheme();
+
+/* ---------- helpers ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic = (n, cls='ico') => `<svg class="${cls}"><use href="#i-${n}"/></svg>`;
+const vib = p => { try { navigator.vibrate?.(p); } catch {} };
+const fmtDay = new Intl.DateTimeFormat('tr-TR', {weekday:'long', day:'numeric', month:'long'});
+const fmtTime = new Intl.DateTimeFormat('tr-TR', {hour:'2-digit', minute:'2-digit'});
+const fmtShort = new Intl.DateTimeFormat('tr-TR', {day:'numeric', month:'short'});
+function startOfDay(d){ const x = new Date(d); x.setHours(0,0,0,0); return x.getTime(); }
+function relWhen(ts) {
+  const d = new Date(ts), today = startOfDay(Date.now()), day = startOfDay(ts);
+  const t = fmtTime.format(d);
+  if (day === today) return 'Bugün ' + t;
+  if (day === today + DAY) return 'Yarın ' + t;
+  if (day === today - DAY) return 'Dün ' + t;
+  if (Math.abs(day - today) < 6 * DAY) return new Intl.DateTimeFormat('tr-TR',{weekday:'long'}).format(d) + ' ' + t;
+  return fmtShort.format(d) + ' ' + t;
+}
+function relEdit(ts) {
+  const m = Math.round((Date.now() - ts) / 6e4);
+  if (m < 1) return 'Az önce düzenlendi';
+  if (m < 60) return m + ' dk önce düzenlendi';
+  if (startOfDay(ts) === startOfDay(Date.now())) return 'Bugün ' + fmtTime.format(ts) + ' düzenlendi';
+  return fmtShort.format(ts) + ' düzenlendi';
+}
+const whenOf = r => r.snoozeAt || r.at;
+const isLate = n => !!(n.reminder && !n.trashed && n.reminder.repeat === 'none' && n.reminder.fired && !n.reminder.snoozeAt);
+const isEmpty = n => !n.title.trim() && !n.body.trim() && !n.items.some(i => i.text.trim());
+const allTags = () => [...new Set(notes.filter(n => !n.trashed).flatMap(n => n.tags))].sort((a,b)=>a.localeCompare(b,'tr'));
+const norm = s => s.toLocaleLowerCase('tr-TR');
+const autosize = el => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; };
+
+function toast(msg, btn, fn) {
+  const t = $('#toast'), b = $('#toastBtn');
+  $('#toastMsg').textContent = msg;
+  b.classList.toggle('hidden', !btn);
+  if (btn) { b.textContent = btn; b.onclick = () => { fn(); t.classList.remove('show'); }; }
+  t.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), btn ? 5000 : 2600);
+}
+
+/* ---------- rendering ---------- */
+$('#today').textContent = fmtDay.format(new Date());
+
+function cardHTML(n) {
+  const late = isLate(n);
+  let content = '';
+  if (n.type === 'list') {
+    const open = n.items.filter(i => !i.done), done = n.items.filter(i => i.done);
+    const shown = [...open, ...done].slice(0, 7);
+    content = `<ul>${shown.map(i => `<li class="${i.done?'done':''}"><span class="bx"></span><span>${esc(i.text) || '&nbsp;'}</span></li>`).join('')}</ul>` +
+      (n.items.length > 7 ? `<div class="more">+${n.items.length - 7} madde daha</div>` : '');
+  } else if (n.body.trim()) content = `<p>${esc(n.body)}</p>`;
+  const meta = [];
+  if (n.reminder && !n.trashed) meta.push(`<span class="pill ${late?'late':'alarm'}">${ic(n.reminder.repeat !== 'none' ? 'repeat' : 'bell')}${esc(relWhen(whenOf(n.reminder)))}</span>`);
+  n.tags.forEach(t => meta.push(`<span class="pill">${esc(t)}</span>`));
+  if (n.trashed) meta.push(`<span class="pill">${Math.max(0, 30 - Math.floor((Date.now() - n.trashed) / DAY))} gün sonra silinecek</span>`);
+  return `<button class="card ${n.pinned?'has-pin':''}" data-id="${n.id}" data-c="${n.color}" style="background:var(--c-${n.color})">
+    ${n.pinned ? `<span class="pin">${ic('pin')}</span>` : ''}
+    ${n.title.trim() ? `<h3>${esc(n.title)}</h3>` : ''}${content}
+    ${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}</button>`;
+}
+
+const emptyArt = `<svg class="art" viewBox="0 0 120 120" aria-hidden="true">
+  <rect x="26" y="18" width="68" height="86" rx="12" fill="var(--c-turkuaz)" stroke="var(--e-turkuaz)" stroke-width="2"/>
+  <path d="M40 44h40M40 58h40M40 72h24" stroke="var(--e-turkuaz)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="88" cy="88" r="16" fill="var(--c-safran)" stroke="var(--e-safran)" stroke-width="2"/>
+  <path d="M88 80v16M80 88h16" stroke="var(--e-safran)" stroke-width="3" stroke-linecap="round"/></svg>`;
+const empty = (h, p) => `<div class="empty">${emptyArt}<h2>${h}</h2><p>${p}</p></div>`;
+
+function matches(n) {
+  if (tagFilter && !n.tags.includes(tagFilter)) return false;
+  if (!query) return true;
+  const q = norm(query);
+  return norm(n.title).includes(q) || norm(n.body).includes(q) || n.items.some(i => norm(i.text).includes(q)) || n.tags.some(t => norm(t).includes(q));
+}
+const byUpdated = (a, b) => b.updated - a.updated;
+// Kartları sütunlara dengeli dağıt (yükseklik tahmini ile)
+function gridHTML(list) {
+  const n = S.layout === 'list' ? 1 : innerWidth >= 720 ? 3 : 2;
+  const cols = Array.from({length:n}, () => ({h:0, html:''}));
+  list.forEach(x => {
+    const h = 60 + (x.title ? 30 : 0) + (x.type === 'list' ? Math.min(x.items.length, 7) * 26 : Math.min(x.body.length / 22, 9) * 21) + ((x.reminder || x.tags.length) ? 30 : 0);
+    const c = cols.reduce((a, b) => b.h < a.h ? b : a); c.html += cardHTML(x); c.h += h;
+  });
+  return `<div class="grid">${cols.map(c => `<div class="col">${c.html}</div>`).join('')}</div>`;
+}
+let rw = innerWidth; addEventListener('resize', () => { if ((rw >= 720) !== (innerWidth >= 720)) render(); rw = innerWidth; });
+
+function render() {
+  const titles = {notes:'Notlar', reminders:'Hatırlatmalar', archive:'Arşiv', trash:'Çöp kutusu', settings:'Ayarlar'};
+  $('#viewTitle').textContent = titles[view];
+  document.querySelectorAll('nav.bottom button').forEach(b => { if (b.dataset.view === view || (view==='trash' && b.dataset.view==='settings')) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  const showSearch = view === 'notes' || view === 'archive';
+  $('#searchWrap').classList.toggle('hidden', !showSearch);
+  $('#fab').classList.toggle('hidden', view === 'settings' || view === 'trash');
+  $('#fabList').classList.toggle('hidden', view !== 'notes');
+  $('#viewToggle').innerHTML = ic(S.layout === 'grid' ? 'rows' : 'grid');
+  renderChips();
+  const late = notes.filter(isLate).length;
+  const upcoming = notes.filter(n => n.reminder && !n.trashed).length;
+  $('#badge').textContent = late; $('#badge').classList.toggle('hidden', !late);
+
+  const m = $('#main');
+  let html = '', cnt = '';
+  if (view === 'notes') {
+    const list = notes.filter(n => !n.archived && !n.trashed && matches(n)).sort(byUpdated);
+    const pinned = list.filter(n => n.pinned), rest = list.filter(n => !n.pinned);
+    cnt = list.length ? list.length + ' not' : '';
+    if (!list.length) html = query || tagFilter ? empty('Eşleşen not yok', 'Aramayı değiştir ya da etiket filtresini kaldır.') : empty('İlk notunu yaz', 'Aklına geleni hemen kaydet. Alışveriş listesi, ders planı, hatırlatma…');
+    else {
+      if (pinned.length) html += `<div class="section-t">Sabitlenenler</div>` + gridHTML(pinned);
+      if (rest.length) html += (pinned.length ? `<div class="section-t">Diğerleri</div>` : '') + gridHTML(rest);
+    }
+  } else if (view === 'archive') {
+    const list = notes.filter(n => n.archived && !n.trashed && matches(n)).sort(byUpdated);
+    cnt = list.length ? list.length + ' not' : '';
+    html = list.length ? gridHTML(list) : empty('Arşiv boş', 'Bitmiş ama silmek istemediğin notları burada saklayabilirsin.');
+  } else if (view === 'trash') {
+    const list = notes.filter(n => n.trashed).sort((a,b) => b.trashed - a.trashed);
+    cnt = list.length ? list.length + ' not' : '';
+    html = `<button class="row" id="backSettings" style="padding:6px 4px 14px">${ic('back')}<span class="tx">Ayarlara dön</span></button>`;
+    html += list.length ? gridHTML(list) + `<div class="btns" style="margin-top:14px"><button class="btn warn" id="emptyTrash">Çöpü boşalt</button></div>` : empty('Çöp kutusu boş', 'Silinen notlar 30 gün burada kalır, sonra kendiliğinden silinir.');
+  } else if (view === 'reminders') {
+    const list = notes.filter(n => n.reminder && !n.trashed).sort((a,b) => whenOf(a.reminder) - whenOf(b.reminder));
+    cnt = upcoming ? upcoming + ' hatırlatma' : '';
+    if (!list.length) html = empty('Hatırlatma yok', 'Bir notu açıp zil simgesine dokun. Saati gelince telefonun seni uyarır.');
+    else {
+      const now = Date.now(), W = l => whenOf(l.reminder), groups = [['Geçmiş', l => W(l) < now], ['Bugün', l => W(l) >= now && startOfDay(W(l)) === startOfDay(now)], ['Yaklaşan', l => W(l) >= now && startOfDay(W(l)) > startOfDay(now)]];
+      groups.forEach(([g, f]) => {
+        const items = list.filter(f); if (!items.length) return;
+        html += `<div class="section-t">${g}</div>` + items.map(n => {
+          const d = new Date(W(n)), past = W(n) < now;
+          return `<button class="rem" data-id="${n.id}"><span class="when ${past?'late':''}"><b>${d.getDate()}</b><span>${new Intl.DateTimeFormat('tr-TR',{month:'short'}).format(d)}</span></span>
+            <span class="tx"><strong>${esc(n.title.trim() || n.body.trim().split('\n')[0] || (n.items[0]?.text) || 'Başlıksız not')}</strong>
+            <small>${fmtTime.format(d)}${n.reminder.snoozeAt ? ' · ertelendi' : ''}${n.reminder.repeat !== 'none' ? ' · ' + REPEAT[n.reminder.repeat] : ''}</small></span>${ic('bell')}</button>`;
+        }).join('');
+      });
+    }
+  } else if (view === 'settings') html = settingsHTML();
+  $('#count').textContent = cnt;
+  m.innerHTML = html;
+}
+
+function renderChips() {
+  const tags = allTags(), c = $('#chips');
+  if (!tags.length) { c.innerHTML = ''; c.classList.add('hidden'); return; }
+  c.classList.remove('hidden');
+  if (tagFilter && !tags.includes(tagFilter)) tagFilter = null;
+  c.innerHTML = `<button class="chip" data-tag="" aria-pressed="${!tagFilter}">Tümü</button>` + tags.map(t => `<button class="chip" data-tag="${esc(t)}" aria-pressed="${tagFilter===t}">${esc(t)}</button>`).join('');
+}
+
+function settingsHTML() {
+  const perm = 'Notification' in window ? Notification.permission : 'unsupported';
+  const permTx = {granted:'Açık', denied:'Engellendi. Tarayıcı ayarlarından izin ver.', default:'Kapalı. Açmak için dokun.', unsupported:'Bu tarayıcı desteklemiyor'}[perm];
+  const tc = notes.filter(n => n.trashed).length;
+  const installed = matchMedia('(display-mode: standalone)').matches;
+  return `
+  <div class="section-t">Görünüm</div>
+  <div class="set"><div class="row"><span class="tx">Tema</span>
+    <div class="seg" role="group" aria-label="Tema">${[['auto','Otomatik'],['light','Açık'],['dark','Koyu']].map(([k,l]) => `<button data-theme="${k}" aria-pressed="${S.theme===k}">${l}</button>`).join('')}</div></div></div>
+  <div class="section-t">Hatırlatmalar</div>
+  <div class="set">
+    <button class="row" id="askPerm">${ic('bell')}<span class="tx">Bildirim izni<small>${permTx}</small></span></button>
+    <button class="row" id="testAlarm">${ic('check')}<span class="tx">Bildirimi dene<small>5 saniye sonra örnek bir uyarı gelir</small></span></button>
+  </div>
+  <p class="hint" style="margin:-4px 6px 14px">Uygulama kapalıyken de kesin çalmasını istediğin hatırlatmalar için not içinden “Takvime ekle” seçeneğini kullan. Telefonun takvimi alarmı kendisi çalar.</p>
+  <div class="section-t">Veriler</div>
+  <div class="set">
+    <button class="row" id="exportBtn">${ic('share')}<span class="tx">Yedek al<small>Tüm notları bir dosyaya indir</small></span></button>
+    <button class="row" id="importBtn">${ic('restore')}<span class="tx">Yedekten geri yükle<small>Yedek dosyasını seç, notlar mevcut olanlara eklenir</small></span></button>
+    <button class="row" id="trashBtn">${ic('trash')}<span class="tx">Çöp kutusu<small>${tc ? tc + ' not' : 'Boş'}</small></span></button>
+  </div>
+  ${installed ? '' : `<div class="section-t">Telefona kur</div><div class="set"><button class="row" id="installBtn">${ic('plus')}<span class="tx">Ana ekrana ekle<small>Tarayıcı menüsünden “Ana ekrana ekle”yi seçerek de kurabilirsin</small></span></button></div>`}
+  <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+  <p class="about">Notlar · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
+}
+
+/* ---------- navigation ---------- */
+document.querySelector('nav.bottom').addEventListener('click', e => {
+  const b = e.target.closest('button[data-view]'); if (!b) return;
+  view = b.dataset.view; vib(8); render(); window.scrollTo({top:0});
+});
+$('#chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  tagFilter = b.dataset.tag || null; render();
+});
+$('#q').addEventListener('input', e => { query = e.target.value.trim(); render(); });
+$('#viewToggle').addEventListener('click', e => { e.preventDefault(); S.layout = S.layout === 'grid' ? 'list' : 'grid'; saveSettings(); render(); });
+$('#fab').addEventListener('click', () => newNote('text'));
+$('#fabList').addEventListener('click', () => newNote('list'));
+
+$('#main').addEventListener('click', async e => {
+  const card = e.target.closest('[data-id]');
+  if (card) return openEditor(card.dataset.id);
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.theme) { S.theme = t.dataset.theme; saveSettings(); applyTheme(); render(); return; }
+  switch (t.id) {
+    case 'askPerm': await askPermission(); render(); break;
+    case 'testAlarm':
+      if (!(await askPermission())) return;
+      toast('5 saniye sonra deneme bildirimi gelecek');
+      setTimeout(() => notify({id:'test', title:'Deneme bildirimi', body:'Hatırlatmalar çalışıyor.'}), 5000); break;
+    case 'exportBtn': exportData(); break;
+    case 'importBtn': $('#importFile').click(); break;
+    case 'trashBtn': view = 'trash'; render(); break;
+    case 'backSettings': view = 'settings'; render(); break;
+    case 'emptyTrash':
+      confirmSheet('Çöp kutusu boşaltılsın mı?', 'Buradaki notlar kalıcı olarak silinir. Bu işlem geri alınamaz.', 'Kalıcı olarak sil', () => {
+        notes = notes.filter(n => !n.trashed); persist(); render(); toast('Çöp kutusu boşaltıldı'); }); break;
+    case 'installBtn':
+      if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; }
+      else toast('Tarayıcı menüsünden “Ana ekrana ekle”yi seç'); break;
+  }
+});
+$('#main').addEventListener('change', e => { if (e.target.id === 'importFile') importData(e.target.files[0]); });
+
+/* ---------- editor ---------- */
+const ed = $('#editor'), edTitle = $('#edTitle'), edText = $('#edText'), edList = $('#edList');
+function newNote(type) {
+  const now = Date.now();
+  const n = {id:uid(), type, title:'', body:'', color:'none', pinned:false, tags: tagFilter ? [tagFilter] : [], items: type === 'list' ? [{id:uid(), text:'', done:false}] : [], reminder:null, archived: view === 'archive', trashed:null, created:now, updated:now};
+  notes.unshift(n);
+  openEditor(n.id, true);
+}
+function openEditor(id, fresh) {
+  editing = notes.find(n => n.id === id); if (!editing) return;
+  vib(6);
+  edTitle.value = editing.title; edText.value = editing.body;
+  paintEditor();
+  ed.classList.add('open'); ed.setAttribute('aria-hidden', 'false');
+  pushNav();
+  requestAnimationFrame(() => {
+    autosize(edTitle); autosize(edText);
+    if (fresh) (editing.type === 'list' ? edList.querySelector('textarea') : edText).focus();
+  });
+}
+function paintEditor() {
+  const n = editing;
+  ed.style.setProperty('--ed-bg', n.color === 'none' ? 'var(--bg)' : `var(--c-${n.color})`);
+  $('#edPin').classList.toggle('on', n.pinned);
+  $('#edPin').setAttribute('aria-label', n.pinned ? 'Sabitlemeyi kaldır' : 'Sabitle');
+  $('#edAlarm').classList.toggle('on', !!n.reminder);
+  $('#edCheck').classList.toggle('on', n.type === 'list');
+  $('#edArchive').innerHTML = ic(n.archived ? 'restore' : 'archive');
+  $('#edArchive').setAttribute('aria-label', n.archived ? 'Arşivden çıkar' : 'Arşivle');
+  $('#edArchive').classList.toggle('hidden', !!n.trashed);
+  $('#edStamp').textContent = n.trashed ? 'Çöp kutusunda' : relEdit(n.updated);
+  const info = [];
+  if (n.reminder) info.push(`<span class="pill ${isLate(n) ? 'late' : 'alarm'}" data-act="alarm">${ic(n.reminder.repeat!=='none'?'repeat':'bell')}${esc(relWhen(whenOf(n.reminder)))}${n.reminder.repeat!=='none' ? ' · ' + REPEAT[n.reminder.repeat] : ''}</span>`);
+  n.tags.forEach(t => info.push(`<span class="pill" data-tagx="${esc(t)}">${esc(t)}<span class="x" aria-label="Etiketi kaldır">✕</span></span>`));
+  $('#edInfo').innerHTML = info.join('');
+  edText.classList.toggle('hidden', n.type === 'list');
+  edList.classList.toggle('hidden', n.type !== 'list');
+  if (n.type === 'list') paintList();
+}
+function paintList() {
+  const n = editing, open = n.items.filter(i => !i.done), done = n.items.filter(i => i.done);
+  const li = i => `<li data-iid="${i.id}" class="${i.done?'done':''}"><button class="cb" aria-label="${i.done?'İşareti kaldır':'Tamamlandı işaretle'}">${ic('check','')}</button>
+    <textarea rows="1" enterkeyhint="next" placeholder="Madde">${esc(i.text)}</textarea><button class="del" aria-label="Maddeyi sil">${ic('x','ico')}</button></li>`;
+  edList.innerHTML = `<ul class="cl">${open.map(li).join('')}</ul><button class="cl-add" id="clAdd">${ic('plus')}Madde ekle</button>` +
+    (done.length ? `<div class="done-h">${done.length} tamamlandı</div><ul class="cl">${done.map(li).join('')}</ul>` : '');
+  edList.querySelectorAll('textarea').forEach(autosize);
+}
+function touch() {
+  editing.updated = Date.now(); persist();
+  $('#edSaved').textContent = 'Kaydedildi';
+  clearTimeout(touch.t); touch.t = setTimeout(() => $('#edSaved').textContent = '', 1200);
+  $('#edStamp').textContent = relEdit(editing.updated);
+}
+edTitle.addEventListener('input', () => { editing.title = edTitle.value.replace(/\n/g, ' '); autosize(edTitle); touch(); });
+edTitle.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); (editing.type === 'list' ? edList.querySelector('textarea') : edText)?.focus(); } });
+edText.addEventListener('input', () => { editing.body = edText.value; autosize(edText); touch(); });
+
+edList.addEventListener('input', e => {
+  const li = e.target.closest('li'); if (!li) return;
+  const it = editing.items.find(i => i.id === li.dataset.iid); it.text = e.target.value.replace(/\n/g, ' '); autosize(e.target); touch();
+});
+edList.addEventListener('keydown', e => {
+  const li = e.target.closest('li'); if (!li || e.target.tagName !== 'TEXTAREA') return;
+  const idx = editing.items.findIndex(i => i.id === li.dataset.iid);
+  if (e.key === 'Enter') { e.preventDefault(); addItem(idx + 1); }
+  if (e.key === 'Backspace' && !e.target.value && editing.items.length > 1) {
+    e.preventDefault(); const prev = li.previousElementSibling?.dataset.iid;
+    editing.items.splice(idx, 1); touch(); paintList();
+    focusItem(prev ?? editing.items[0]?.id);
+  }
+});
+edList.addEventListener('click', e => {
+  if (e.target.closest('#clAdd')) return addItem(editing.items.filter(i => !i.done).length ? editing.items.indexOf(editing.items.filter(i=>!i.done).at(-1)) + 1 : editing.items.length);
+  const li = e.target.closest('li'); if (!li) return;
+  const idx = editing.items.findIndex(i => i.id === li.dataset.iid);
+  if (e.target.closest('.cb')) { editing.items[idx].done = !editing.items[idx].done; vib(editing.items[idx].done ? [8,40,8] : 6); touch(); paintList(); }
+  if (e.target.closest('.del')) { editing.items.splice(idx, 1); touch(); paintList(); }
+});
+function addItem(at) { const it = {id:uid(), text:'', done:false}; editing.items.splice(at, 0, it); touch(); paintList(); focusItem(it.id); }
+function focusItem(id) { const t = edList.querySelector(`li[data-iid="${id}"] textarea`); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
+
+function toggleType() {
+  const n = editing;
+  if (n.type === 'text') {
+    const lines = n.body.split('\n').map(s => s.replace(/^\s*([-*•]|\d+[.)])\s*/, '').trim()).filter(Boolean);
+    n.items = (lines.length ? lines : ['']).map(t => ({id:uid(), text:t, done:false})); n.body = ''; n.type = 'list';
+  } else {
+    n.body = n.items.map(i => (i.done ? '✓ ' : '') + i.text).filter(s => s.trim()).join('\n'); n.items = []; n.type = 'text'; edText.value = n.body;
+  }
+  touch(); paintEditor(); requestAnimationFrame(() => autosize(edText));
+}
+
+function closeEditor(fromPop) {
+  if (!editing) return;
+  stopMic();
+  const n = editing; editing = null;
+  ed.classList.remove('open'); ed.setAttribute('aria-hidden', 'true');
+  document.activeElement?.blur();
+  if (n.type === 'list') n.items = n.items.filter((i, k, a) => i.text.trim() || a.length === 1);
+  if (isEmpty(n) && !n.reminder) { notes = notes.filter(x => x.id !== n.id); persist(); if (n.title || n.body || n.created !== n.updated) toast('Boş not silindi'); }
+  else persist();
+  closeSheet(true);
+  if (depth > 0) { skipPop++; history.go(-depth); depth = 0; }
+  render();
+}
+$('#edBack').addEventListener('click', () => closeEditor());
+window.addEventListener('popstate', () => {
+  if (skipPop) { skipPop--; return; }
+  depth = Math.max(0, depth - 1);
+  if (sheetOpen) return closeSheet(true);
+  if (editing) closeEditor(true);
+});
+
+$('#edPin').addEventListener('click', () => { editing.pinned = !editing.pinned; vib(8); touch(); paintEditor(); });
+$('#edArchive').addEventListener('click', () => {
+  const n = editing; n.archived = !n.archived; if (n.archived) n.pinned = false; touch(); closeEditor();
+  toast(n.archived ? 'Not arşivlendi' : 'Not arşivden çıkarıldı', 'Geri al', () => { n.archived = !n.archived; persist(); render(); });
+});
+$('#edCheck').addEventListener('click', toggleType);
+$('#edColor').addEventListener('click', colorSheet);
+$('#edTag').addEventListener('click', tagSheet);
+$('#edAlarm').addEventListener('click', alarmSheet);
+$('#edMore').addEventListener('click', moreSheet);
+$('#edInfo').addEventListener('click', e => {
+  const p = e.target.closest('.pill'); if (!p) return;
+  if (p.dataset.act === 'alarm') return alarmSheet();
+  if (p.dataset.tagx !== undefined) { editing.tags = editing.tags.filter(t => t !== p.dataset.tagx); touch(); paintEditor(); }
+});
+
+/* ---------- voice dictation ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+if (!SR) $('#edMic').classList.add('hidden');
+$('#edMic').addEventListener('click', () => rec ? stopMic() : startMic());
+function startMic() {
+  if (!SR) return;
+  rec = new SR(); rec.lang = 'tr-TR'; rec.interimResults = false; rec.continuous = true;
+  rec.onresult = e => {
+    const txt = [...e.results].slice(e.resultIndex).filter(r => r.isFinal).map(r => r[0].transcript).join(' ').trim();
+    if (!txt || !editing) return;
+    if (editing.type === 'list') { const it = {id:uid(), text:txt, done:false}; const empty = editing.items.findIndex(i => !i.text.trim()); if (empty >= 0) editing.items[empty].text = txt; else editing.items.push(it); paintList(); }
+    else { const pre = editing.body && !/\s$/.test(editing.body) ? ' ' : ''; editing.body += pre + txt.charAt(0).toLocaleUpperCase('tr-TR') + txt.slice(1); edText.value = editing.body; autosize(edText); }
+    touch();
+  };
+  rec.onerror = e => { if (e.error === 'not-allowed') toast('Mikrofon izni verilmedi'); stopMic(); };
+  rec.onend = () => { if (rec) stopMic(); };
+  try { rec.start(); $('#edMic').classList.add('rec'); toast('Dinliyorum, konuş'); vib(10); } catch { stopMic(); }
+}
+function stopMic() { const r = rec; rec = null; try { r?.stop(); } catch {} $('#edMic').classList.remove('rec'); }
+
+/* ---------- sheets ---------- */
+let sheetOpen = false;
+const sheet = $('#sheet'), scrim = $('#scrim');
+function openSheet(html, label) {
+  sheet.innerHTML = `<div class="grab"></div>` + html;
+  sheet.setAttribute('aria-label', label);
+  sheet.classList.add('open'); scrim.classList.add('open');
+  if (!sheetOpen) pushNav();
+  sheetOpen = true;
+}
+function closeSheet(silent) {
+  if (!sheetOpen) return;
+  sheetOpen = false; sheet.classList.remove('open'); scrim.classList.remove('open');
+  if (!silent && depth > 0) { skipPop++; depth--; history.back(); }
+}
+scrim.addEventListener('click', () => closeSheet());
+
+function colorSheet() {
+  openSheet(`<h2>Renk</h2><p class="sub">Notları renklere göre ayırmak bulmayı kolaylaştırır.</p><div class="swatches">${COLORS.map(([k,l]) =>
+    `<button class="sw" data-col="${k}" aria-label="${l}" aria-pressed="${editing.color===k}" style="background:var(--c-${k});border-color:var(--e-${k})">${k==='none'?ic('x',''):''}</button>`).join('')}</div>`, 'Renk seç');
+  sheet.onclick = e => { const b = e.target.closest('[data-col]'); if (!b) return; editing.color = b.dataset.col; vib(6); touch(); paintEditor(); sheet.querySelectorAll('.sw').forEach(s => s.setAttribute('aria-pressed', s === b)); };
+}
+
+function tagSheet() {
+  const draw = () => {
+    const tags = allTags();
+    openSheet(`<h2>Etiketler</h2><p class="sub">Notu bir veya daha fazla etiketle grupla.</p>
+      <form id="tagForm" style="display:flex;gap:8px"><label class="field" style="flex:1;margin:0"><input id="tagIn" placeholder="Yeni etiket, örn. okul" maxlength="24" autocomplete="off" aria-label="Yeni etiket"></label><button class="btn pri" style="flex:none;width:90px;height:50px">Ekle</button></form>
+      <div class="taglist">${tags.map(t => `<button class="chip" data-t="${esc(t)}" aria-pressed="${editing.tags.includes(t)}">${esc(t)}</button>`).join('')}</div>`, 'Etiketler');
+    $('#tagForm').onsubmit = e => { e.preventDefault(); const v = $('#tagIn').value.trim().toLocaleLowerCase('tr-TR'); if (v && !editing.tags.includes(v)) { editing.tags.push(v); touch(); paintEditor(); } draw(); };
+  };
+  draw();
+  sheet.onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; const t = b.dataset.t;
+    editing.tags = editing.tags.includes(t) ? editing.tags.filter(x => x !== t) : [...editing.tags, t]; touch(); paintEditor(); b.setAttribute('aria-pressed', editing.tags.includes(t)); };
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+function toLocalInput(ts) { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function at(dayOffset, h, m = 0) { const d = new Date(); d.setDate(d.getDate() + dayOffset); d.setHours(h, m, 0, 0); return d.getTime(); }
+function nextMonday9() { const d = new Date(); d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); d.setHours(9,0,0,0); return d.getTime(); }
+
+function alarmSheet() {
+  const r = editing.reminder, now = Date.now();
+  const evening = at(0, 18) > now + 6e4 ? at(0, 18) : at(1, 18);
+  const quick = [
+    ['1 saat sonra', fmtTime.format(now + 36e5), Math.round((now + 36e5) / 6e4) * 6e4],
+    [startOfDay(evening) === startOfDay(now) ? 'Bu akşam' : 'Yarın akşam', '18:00', evening],
+    ['Yarın sabah', '09:00', at(1, 9)],
+    ['Pazartesi', '09:00', nextMonday9()]];
+  const cur = r ? r.at : quick[2][2];
+  openSheet(`<h2>Hatırlatma</h2><p class="sub">Saati gelince bildirim gönderilir ve telefon titrer.</p>
+    <div class="quick">${quick.map(([a,b,ts]) => `<button data-ts="${ts}"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
+    <label class="field"><span>Tarih ve saat</span><input type="datetime-local" id="alDt" value="${toLocalInput(cur)}"></label>
+    <label class="field"><span>Tekrar</span><select id="alRep">${Object.entries(REPEAT).map(([k,l]) => `<option value="${k}" ${(r?.repeat||'none')===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <div class="btns">${r ? '<button class="btn warn" id="alDel">Kaldır</button>' : ''}<button class="btn pri" id="alSave">${r ? 'Güncelle' : 'Hatırlatma kur'}</button></div>
+    <div class="cal-links"><button id="alGcal">${ic('cal','ico')}<span>Google Takvim’e ekle</span></button><button id="alIcs">Takvim dosyası (.ics)</button></div>
+    <p class="hint">Uygulama tamamen kapalıyken tarayıcı bildirimi gecikebilir. Önemli hatırlatmaları takvime de ekle; takvim uygulaman alarmı kendisi çalar.</p>`, 'Hatırlatma');
+  sheet.onclick = async e => {
+    const q = e.target.closest('[data-ts]');
+    if (q) { $('#alDt').value = toLocalInput(+q.dataset.ts); sheet.querySelectorAll('[data-ts]').forEach(x => x.setAttribute('aria-pressed', x === q)); return; }
+    const b = e.target.closest('button'); if (!b) return;
+    const ts = new Date($('#alDt').value).getTime(), rep = $('#alRep').value;
+    if (b.id === 'alDel') { editing.reminder = null; touch(); paintEditor(); closeSheet(); toast('Hatırlatma kaldırıldı'); }
+    if (b.id === 'alSave') {
+      if (!ts) return toast('Tarih ve saat seç');
+      if (ts < Date.now() - 3e4 && rep === 'none') return toast('Geçmiş bir saat seçtin. İleri bir saat seç.');
+      editing.reminder = {at: ts < Date.now() ? advance(ts, rep) : ts, repeat: rep, fired: false, snoozeAt: null};
+      touch(); paintEditor(); closeSheet(); vib([10, 60, 10]);
+      const ok = await askPermission();
+      toast(ok ? relWhen(editing.reminder.at) + ' için hatırlatma kuruldu' : 'Hatırlatma kuruldu. Bildirim izni kapalı, sadece uygulama içinde uyarır.');
+      schedule();
+    }
+    if (b.id === 'alGcal' || b.id === 'alIcs') {
+      if (!ts) return toast('Önce tarih ve saat seç');
+      b.id === 'alGcal' ? openGcal(editing, ts, rep) : downloadIcs(editing, ts, rep);
+    }
+  };
+}
+
+function moreSheet() {
+  const n = editing;
+  const rows = n.trashed
+    ? [['restore','Geri yükle','restore'],['trash','Kalıcı olarak sil','purge','danger']]
+    : [['share','Paylaş','share'],['copy','Kopyasını oluştur','dup'],['copy','Metni kopyala','copytext'],['trash','Sil','del','danger']];
+  openSheet(`<div class="menu">${rows.map(([i,l,a,c]) => `<button class="row ${c||''}" data-a="${a}">${ic(i)}<span class="tx">${l}</span></button>`).join('')}</div>
+    <p class="hint" style="text-align:center">Oluşturuldu: ${new Intl.DateTimeFormat('tr-TR',{dateStyle:'long',timeStyle:'short'}).format(n.created)}</p>`, 'Diğer işlemler');
+  sheet.onclick = async e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    const a = b.dataset.a;
+    if (a === 'share') { const t = noteText(n); closeSheet(); try { if (navigator.share) await navigator.share({title: n.title || 'Not', text: t}); else { await navigator.clipboard.writeText(t); toast('Paylaşım desteklenmiyor, metin kopyalandı'); } } catch {} }
+    if (a === 'copytext') { try { await navigator.clipboard.writeText(noteText(n)); toast('Metin kopyalandı'); } catch { toast('Kopyalanamadı'); } closeSheet(); }
+    if (a === 'dup') { const c = JSON.parse(JSON.stringify(n)); c.id = uid(); c.title = n.title ? n.title + ' (kopya)' : ''; c.created = c.updated = Date.now(); c.reminder = null; c.items.forEach(i => i.id = uid()); notes.unshift(c); persist(); closeSheet(true); closeEditor(); toast('Kopya oluşturuldu'); }
+    if (a === 'del') { n.trashed = Date.now(); n.pinned = false; persist(); closeSheet(true); closeEditor();
+      toast('Not çöp kutusuna taşındı', 'Geri al', () => { n.trashed = null; persist(); render(); }); }
+    if (a === 'restore') { n.trashed = null; persist(); closeSheet(true); closeEditor(); toast('Not geri yüklendi'); }
+    if (a === 'purge') { closeSheet(true); confirmSheet('Not kalıcı olarak silinsin mi?', 'Bu işlem geri alınamaz.', 'Kalıcı olarak sil', () => { const id = n.id; closeEditor(); notes = notes.filter(x => x.id !== id); persist(); render(); toast('Not silindi'); }); }
+  };
+}
+
+function confirmSheet(title, sub, cta, fn) {
+  openSheet(`<h2>${title}</h2><p class="sub">${sub}</p><div class="btns"><button class="btn" data-c="0">Vazgeç</button><button class="btn pri" style="background:var(--danger);color:#fff" data-c="1">${cta}</button></div>`, title);
+  sheet.onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; closeSheet(); if (b.dataset.c === '1') fn(); };
+}
+
+const noteText = n => [n.title, n.type === 'list' ? n.items.map(i => (i.done ? '☑ ' : '☐ ') + i.text).join('\n') : n.body].filter(s => s && s.trim()).join('\n\n');
+
+/* ---------- calendar export ---------- */
+const RR = {daily:'FREQ=DAILY', weekdays:'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', weekly:'FREQ=WEEKLY', monthly:'FREQ=MONTHLY', yearly:'FREQ=YEARLY'};
+const utc = ts => new Date(ts).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+const noteTitle = n => n.title.trim() || noteText(n).split('\n')[0]?.slice(0, 60) || 'Hatırlatma';
+function openGcal(n, ts, rep) {
+  const p = new URLSearchParams({action:'TEMPLATE', text: noteTitle(n), dates: utc(ts) + '/' + utc(ts + 15 * 6e4), details: noteText(n).slice(0, 1500)});
+  if (rep !== 'none') p.set('recur', 'RRULE:' + RR[rep]);
+  window.open('https://calendar.google.com/calendar/render?' + p, '_blank', 'noopener');
+}
+function downloadIcs(n, ts, rep) {
+  const e = s => s.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/[,;]/g, m => '\\' + m);
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mehmet Karadeniz//Notlar//TR','BEGIN:VEVENT',
+    'UID:' + n.id + '@notlar','DTSTAMP:' + utc(Date.now()),'DTSTART:' + utc(ts),'DTEND:' + utc(ts + 15 * 6e4),
+    'SUMMARY:' + e(noteTitle(n)),'DESCRIPTION:' + e(noteText(n).slice(0, 1500)),
+    ...(rep !== 'none' ? ['RRULE:' + RR[rep]] : []),
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + e(noteTitle(n)),'TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  saveFile(new Blob([ics], {type:'text/calendar'}), 'hatirlatma.ics');
+  toast('Takvim dosyası indirildi. Açınca takvimine eklenir.');
+}
+function saveFile(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+
+/* ---------- backup ---------- */
+function exportData() {
+  const d = new Date(), name = `notlar-yedek-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
+  saveFile(new Blob([JSON.stringify({app:'Notlar', author:'Mehmet Karadeniz, 2026-2027', version:1, exported:d.toISOString(), notes}, null, 2)], {type:'application/json'}), name);
+  toast('Yedek indirildi');
+}
+function importData(file) {
+  if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const data = JSON.parse(fr.result), list = Array.isArray(data) ? data : data.notes;
+      if (!Array.isArray(list)) throw 0;
+      const ids = new Set(notes.map(n => n.id)); let added = 0;
+      list.forEach(n => { if (!n || typeof n !== 'object' || ids.has(n.id)) return;
+        notes.push(Object.assign({id:uid(), type:'text', title:'', body:'', color:'none', pinned:false, tags:[], items:[], reminder:null, archived:false, trashed:null, created:Date.now(), updated:Date.now()}, n)); added++; });
+      persist(); render(); toast(added ? added + ' not geri yüklendi' : 'Yeni not bulunamadı, hepsi zaten var');
+    } catch { toast('Dosya okunamadı. Notlar yedek dosyası seç.'); }
+  };
+  fr.readAsText(file);
+}
+
+/* ---------- reminders engine ---------- */
+let swReg = null;
+async function askPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  try { return (await Notification.requestPermission()) === 'granted'; } catch { return false; }
+}
+function advance(ts, rep) {
+  const d = new Date(ts), now = Date.now();
+  if (rep === 'none') return ts;
+  do {
+    if (rep === 'daily') d.setDate(d.getDate() + 1);
+    else if (rep === 'weekdays') { do d.setDate(d.getDate() + 1); while (d.getDay() === 0 || d.getDay() === 6); }
+    else if (rep === 'weekly') d.setDate(d.getDate() + 7);
+    else if (rep === 'monthly') d.setMonth(d.getMonth() + 1);
+    else if (rep === 'yearly') d.setFullYear(d.getFullYear() + 1);
+  } while (d.getTime() <= now);
+  return d.getTime();
+}
+async function notify(n) {
+  const title = n.title?.trim() || 'Hatırlatma';
+  const body = n.body ? n.body.slice(0, 160) : (n.items?.length ? n.items.filter(i=>!i.done).map(i => '☐ ' + i.text).join('\n').slice(0, 160) : '');
+  const opts = {body, tag: 'notlar-' + n.id, icon: 'icons/icon-192.png', badge: 'icons/badge-96.png', vibrate: [300, 120, 300, 120, 600], requireInteraction: true, renotify: true, data: {id: n.id},
+    actions: n.id === 'test' ? [] : [{action:'snooze', title:'10 dk ertele'}, {action:'done', title:'Tamam'}]};
+  vib([300, 120, 300, 120, 600]);
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try { const reg = swReg || await navigator.serviceWorker?.ready; if (reg) return reg.showNotification(title, opts); } catch {}
+    try { new Notification(title, opts); } catch {}
+  }
+}
+function ring(n) {
+  if (document.querySelector('.ring')) return;
+  const el = document.createElement('div'); el.className = 'ring'; el.setAttribute('role', 'alertdialog');
+  el.innerHTML = `<div class="bell">${ic('bell')}</div><h2>${esc(noteTitle(n))}</h2><p>${esc(n.type === 'list' ? n.items.filter(i=>!i.done).map(i=>'☐ '+i.text).join('\n') : (n.title.trim() ? n.body : n.body.split('\n').slice(1).join('\n')).trim().slice(0, 200))}</p>
+    <div class="btns"><button class="btn pri" data-r="done">Tamam</button><button class="btn" data-r="snooze">10 dakika ertele</button><button class="btn" data-r="open">Notu aç</button></div>`;
+  document.body.appendChild(el);
+  el.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; el.remove(); handleAction(n.id, b.dataset.r); };
+}
+function handleAction(id, action) {
+  const n = notes.find(x => x.id === id); if (!n || !n.reminder) return;
+  const r = n.reminder;
+  if (action === 'snooze') { n.reminder = {...r, snoozeAt: Date.now() + 10 * 6e4}; toast('10 dakika ertelendi'); }
+  else if (r.repeat === 'none') n.reminder = null;      // tek seferlik: tamamlandı
+  else n.reminder = {...r, snoozeAt: null};             // tekrarlı: sıradaki zaten ayarlı
+  persist(); render(); schedule();
+  if (action === 'open') openEditor(id);
+  closeNotification(id);
+}
+async function closeNotification(id) { try { const reg = swReg || await navigator.serviceWorker?.ready; (await reg?.getNotifications({tag:'notlar-' + id}))?.forEach(x => x.close()); } catch {} }
+
+let timer = null;
+function check() {
+  const now = Date.now();
+  let changed = false;
+  notes.forEach(n => {
+    const r = n.reminder; if (!r || n.trashed) return;
+    const due = r.snoozeAt ? r.snoozeAt : (!r.fired ? r.at : 0);
+    if (!due || due > now + 1000) return;
+    const stale = now - due > 6 * 36e5;               // 6 saatten eski: çalmadan geçmiş say
+    if (!stale) { notify(n); if (document.visibilityState === 'visible') ring(n); }
+    if (r.snoozeAt) n.reminder = {...r, snoozeAt: null, fired: r.repeat === 'none' ? true : r.fired};
+    else if (r.repeat !== 'none') n.reminder = {...r, at: advance(r.at, r.repeat), fired: false};
+    else n.reminder = {...r, fired: true};
+    changed = true;
+  });
+  if (changed) { persist(); if (editing) paintEditor(); else render(); }
+}
+function schedule() {
+  clearTimeout(timer);
+  const next = notes.filter(n => n.reminder && !n.trashed && (n.reminder.snoozeAt || !n.reminder.fired)).map(n => whenOf(n.reminder)).sort((a,b)=>a-b)[0];
+  const wait = next ? Math.min(Math.max(next - Date.now(), 0), 30000) : 30000;
+  timer = setTimeout(() => { check(); schedule(); }, wait);
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { check(); render(); } });
+
+/* ---------- trash cleanup ---------- */
+const before = notes.length;
+notes = notes.filter(n => !n.trashed || Date.now() - n.trashed < 30 * DAY);
+if (notes.length !== before) persist();
+
+/* ---------- service worker & install ---------- */
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(r => { swReg = r; }).catch(() => {});
+  navigator.serviceWorker.addEventListener('message', e => {
+    const d = e.data || {};
+    if (d.type === 'action') { notes = load(KEY, notes); handleAction(d.id, d.action); }
+  });
+}
+const params = new URLSearchParams(location.search);
+if (params.get('new')) { history.replaceState(null, '', location.pathname); setTimeout(() => newNote(params.get('new') === 'list' ? 'list' : 'text'), 50); }
+if (params.get('id') && params.get('action')) { setTimeout(() => handleAction(params.get('id'), params.get('action')), 50); history.replaceState(null, '', location.pathname); }
+
+// diğer sekmede değişiklik olursa
+window.addEventListener('storage', e => { if (e.key === KEY && !editing) { notes = load(KEY, notes); render(); } });
+
+render();
+check();
+schedule();
+</script>
+</body>
+</html>
