@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Notlar</title>
+<title>Notlar v1.0</title>
 <meta name="description" content="Not al, liste tut, hatırlatma kur. Çevrimdışı çalışır.">
 <meta name="author" content="Mehmet Karadeniz, 2026-2027">
 <meta name="theme-color" content="#F2F5F5" media="(prefers-color-scheme: light)">
@@ -52,6 +52,7 @@ header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(va
 .hello{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
 .hello h1{font:800 34px/1.02 var(--font-d);letter-spacing:-.02em;margin:0}
 .hello .day{color:var(--ink-2);font-size:14px;margin:0 0 4px}
+.hello h1 .ver{font:600 12px/1 var(--font-b);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:4px 8px;border-radius:999px;vertical-align:middle;margin-left:8px;letter-spacing:0}
 .hello .count{color:var(--ink-3);font-size:13px;white-space:nowrap;margin-bottom:4px}
 .tile{height:6px;margin:14px 0 12px;border-radius:3px;
   background:
@@ -250,7 +251,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
   <div class="hello">
     <div>
       <p class="day" id="today"></p>
-      <h1 id="viewTitle">Notlar</h1>
+      <h1><span id="viewTitle">Notlar</span><span class="ver" id="surumEtiket">v1.0</span></h1>
     </div>
     <span class="count" id="count"></span>
   </div>
@@ -526,7 +527,7 @@ function settingsHTML() {
   </div>
   ${installed ? '' : `<div class="section-t">Telefona kur</div><div class="set"><button class="row" id="installBtn">${ic('plus')}<span class="tx">Ana ekrana ekle<small>Tarayıcı menüsünden “Ana ekrana ekle”yi seçerek de kurabilirsin</small></span></button></div>`}
   <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-  <p class="about">Notlar · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
+  <p class="about">Notlar v1.0 · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
 }
 
 /* ---------- navigation ---------- */
