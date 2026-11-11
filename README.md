@@ -7,6 +7,7 @@ Telefona kurulabilen, çevrimdışı çalışan not ve hatırlatma uygulaması.
 ## Neler yapabilir
 
 - Not ve yapılacaklar listesi (maddeleri işaretle, tamamlananlar alta iner)
+- El yazısı not: parmakla ya da kalemle yaz/çiz; 5 renk, 3 kalınlık, fosforlu kalem, silgi, geri al; resim olarak paylaş
 - Hatırlatma: tek seferlik ya da her gün, hafta içi, her hafta, her ay, her yıl
 - Saati gelince bildirim, titreşim ve tam ekran uyarı; 10 dakika erteleme
 - Google Takvim'e ya da `.ics` dosyasıyla telefon takvimine ekleme

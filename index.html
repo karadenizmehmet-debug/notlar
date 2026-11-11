@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Notlar v1.0</title>
+<title>Notlar v1.1</title>
 <meta name="description" content="Not al, liste tut, hatırlatma kur. Çevrimdışı çalışır.">
 <meta name="author" content="Mehmet Karadeniz, 2026-2027">
 <meta name="theme-color" content="#F2F5F5" media="(prefers-color-scheme: light)">
@@ -131,6 +131,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 .fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 84px);z-index:31;height:60px;padding:0 22px 0 18px;border-radius:20px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;gap:8px;font:700 16px var(--font-d);box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 40%,transparent);transition:transform .15s ease}
 .fab:active{transform:scale(.95)}
 .fab .ico{stroke-width:2.4}
+.fab3{position:fixed;right:18px;bottom:calc(var(--safe-b) + 212px);z-index:31;width:48px;height:48px;border-radius:16px;background:var(--surface);color:var(--e-kobalt);border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow)}
 .fab2{position:fixed;right:18px;bottom:calc(var(--safe-b) + 154px);z-index:31;width:48px;height:48px;border-radius:16px;background:var(--surface);color:var(--accent);border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow)}
 
 /* ---------- editor ---------- */
@@ -166,7 +167,24 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 .iconbtn.rec{color:#fff;background:var(--danger);animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--danger) 25%,transparent)}}
 
-/* ---------- sheets ---------- */
+/* ink */
+.ink{position:relative;margin:4px 0 0;border-radius:var(--r-md);background:
+  radial-gradient(circle,color-mix(in srgb,var(--ink) 16%,transparent) 1px,transparent 1.4px) 0 0/22px 22px;
+  border:1px dashed color-mix(in srgb,var(--ink) 14%,transparent)}
+.ink canvas{display:block;touch-action:none;position:absolute;left:0;top:0}
+.ink canvas#inkBase{position:relative}
+.ink-more{display:block;margin:10px auto 0;color:var(--ink-2);font-size:14px;font-weight:600;padding:10px 16px;border-radius:12px}
+.ink-tools{display:flex;align-items:center;gap:4px;padding:6px 10px;overflow-x:auto;scrollbar-width:none;border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
+.ink-tools::-webkit-scrollbar{display:none}
+.ink-tools .sep{width:1px;height:24px;background:color-mix(in srgb,var(--ink) 14%,transparent);margin:0 4px;flex:none}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none}
+.dot i{width:20px;height:20px;border-radius:50%;display:block}
+.dot[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+.sz i{background:var(--ink-2)!important}
+.inkprev{display:block;width:100%;height:auto;max-height:240px;margin-top:2px}
+.ink-hint{font-size:12.5px;color:var(--ink-3);text-align:center;margin:8px 0 0}
+
+/* ---------- sheets css ---------- */
 .scrim{position:fixed;inset:0;z-index:60;background:rgba(8,18,20,.42);opacity:0;pointer-events:none;transition:opacity .2s}
 .scrim.open{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 20px calc(var(--safe-b) + 20px);transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);max-height:88dvh;overflow-y:auto}
@@ -243,6 +261,12 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8L4 8.5"/><path d="M4 4v4.5h4.5"/></symbol>
     <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14 7l3 3"/></symbol>
+    <symbol id="i-marker" viewBox="0 0 24 24"><path d="M9 15l-3 3v2h4l3-3"/><path d="M9 15l7-11 4 4-11 7z"/><path d="M4 21h16" opacity=".5"/></symbol>
+    <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M8 20h12"/><path d="M5 15l9-10 6 6-8 9H9z"/><path d="M9 11l5 5"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L7 20"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
   </defs>
 </svg>
@@ -251,7 +275,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
   <div class="hello">
     <div>
       <p class="day" id="today"></p>
-      <h1><span id="viewTitle">Notlar</span><span class="ver" id="surumEtiket">v1.0</span></h1>
+      <h1><span id="viewTitle">Notlar</span><span class="ver" id="surumEtiket">v1.1</span></h1>
     </div>
     <span class="count" id="count"></span>
   </div>
@@ -268,6 +292,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 
 <main id="main" aria-live="polite"></main>
 
+<button class="fab3" id="fabInk" aria-label="Yeni el yazısı not"><svg class="ico"><use href="#i-pen"/></svg></button>
 <button class="fab2" id="fabList" aria-label="Yeni liste"><svg class="ico"><use href="#i-list"/></svg></button>
 <button class="fab" id="fab"><svg class="ico"><use href="#i-plus"/></svg>Yeni not</button>
 
@@ -293,7 +318,13 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
     <div class="ed-info" id="edInfo"></div>
     <textarea class="ed-text" id="edText" placeholder="Not yaz…" aria-label="Not"></textarea>
     <div id="edList" class="hidden"></div>
+    <div id="edInk" class="hidden">
+      <div class="ink" id="inkWrap"><canvas id="inkBase"></canvas><canvas id="inkLive"></canvas></div>
+      <p class="ink-hint">Kaydırmak için iki parmak kullan</p>
+      <button class="ink-more" id="inkMore">Sayfayı uzat</button>
+    </div>
   </div>
+  <div class="ink-tools hidden" id="inkTools" role="toolbar" aria-label="Çizim araçları"></div>
   <div class="ed-bar">
     <button class="iconbtn" id="edColor" aria-label="Renk"><svg class="ico"><use href="#i-palette"/></svg></button>
     <button class="iconbtn" id="edCheck" aria-label="Liste moduna geç"><svg class="ico"><use href="#i-list"/></svg></button>
@@ -350,7 +381,7 @@ function applyTheme() {
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.querySelectorAll('meta[name=theme-color]').forEach(m => m.content = dark ? '#0E191C' : '#F2F5F5');
 }
-mq.addEventListener?.('change', applyTheme);
+mq.addEventListener?.('change', () => { applyTheme(); if (editing?.type === 'draw') redrawBase(); });
 applyTheme();
 
 /* ---------- helpers ---------- */
@@ -379,7 +410,7 @@ function relEdit(ts) {
 }
 const whenOf = r => r.snoozeAt || r.at;
 const isLate = n => !!(n.reminder && !n.trashed && n.reminder.repeat === 'none' && n.reminder.fired && !n.reminder.snoozeAt);
-const isEmpty = n => !n.title.trim() && !n.body.trim() && !n.items.some(i => i.text.trim());
+const isEmpty = n => !n.title.trim() && !n.body.trim() && !n.items.some(i => i.text.trim()) && !(n.ink && n.ink.length);
 const allTags = () => [...new Set(notes.filter(n => !n.trashed).flatMap(n => n.tags))].sort((a,b)=>a.localeCompare(b,'tr'));
 const norm = s => s.toLocaleLowerCase('tr-TR');
 const autosize = el => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; };
@@ -404,7 +435,8 @@ function cardHTML(n) {
     const shown = [...open, ...done].slice(0, 7);
     content = `<ul>${shown.map(i => `<li class="${i.done?'done':''}"><span class="bx"></span><span>${esc(i.text) || '&nbsp;'}</span></li>`).join('')}</ul>` +
       (n.items.length > 7 ? `<div class="more">+${n.items.length - 7} madde daha</div>` : '');
-  } else if (n.body.trim()) content = `<p>${esc(n.body)}</p>`;
+  } else if (n.type === 'draw') content = inkSVG(n);
+  else if (n.body.trim()) content = `<p>${esc(n.body)}</p>`;
   const meta = [];
   if (n.reminder && !n.trashed) meta.push(`<span class="pill ${late?'late':'alarm'}">${ic(n.reminder.repeat !== 'none' ? 'repeat' : 'bell')}${esc(relWhen(whenOf(n.reminder)))}</span>`);
   n.tags.forEach(t => meta.push(`<span class="pill">${esc(t)}</span>`));
@@ -434,7 +466,7 @@ function gridHTML(list) {
   const n = S.layout === 'list' ? 1 : innerWidth >= 720 ? 3 : 2;
   const cols = Array.from({length:n}, () => ({h:0, html:''}));
   list.forEach(x => {
-    const h = 60 + (x.title ? 30 : 0) + (x.type === 'list' ? Math.min(x.items.length, 7) * 26 : Math.min(x.body.length / 22, 9) * 21) + ((x.reminder || x.tags.length) ? 30 : 0);
+    const h = 60 + (x.title ? 30 : 0) + (x.type === 'draw' ? 200 : x.type === 'list' ? Math.min(x.items.length, 7) * 26 : Math.min(x.body.length / 22, 9) * 21) + ((x.reminder || x.tags.length) ? 30 : 0);
     const c = cols.reduce((a, b) => b.h < a.h ? b : a); c.html += cardHTML(x); c.h += h;
   });
   return `<div class="grid">${cols.map(c => `<div class="col">${c.html}</div>`).join('')}</div>`;
@@ -449,6 +481,7 @@ function render() {
   $('#searchWrap').classList.toggle('hidden', !showSearch);
   $('#fab').classList.toggle('hidden', view === 'settings' || view === 'trash');
   $('#fabList').classList.toggle('hidden', view !== 'notes');
+  $('#fabInk').classList.toggle('hidden', view !== 'notes');
   $('#viewToggle').innerHTML = ic(S.layout === 'grid' ? 'rows' : 'grid');
   renderChips();
   const late = notes.filter(isLate).length;
@@ -527,7 +560,7 @@ function settingsHTML() {
   </div>
   ${installed ? '' : `<div class="section-t">Telefona kur</div><div class="set"><button class="row" id="installBtn">${ic('plus')}<span class="tx">Ana ekrana ekle<small>Tarayıcı menüsünden “Ana ekrana ekle”yi seçerek de kurabilirsin</small></span></button></div>`}
   <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-  <p class="about">Notlar v1.0 · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
+  <p class="about">Notlar v1.1 · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
 }
 
 /* ---------- navigation ---------- */
@@ -543,6 +576,7 @@ $('#q').addEventListener('input', e => { query = e.target.value.trim(); render()
 $('#viewToggle').addEventListener('click', e => { e.preventDefault(); S.layout = S.layout === 'grid' ? 'list' : 'grid'; saveSettings(); render(); });
 $('#fab').addEventListener('click', () => newNote('text'));
 $('#fabList').addEventListener('click', () => newNote('list'));
+$('#fabInk').addEventListener('click', () => newNote('draw'));
 
 $('#main').addEventListener('click', async e => {
   const card = e.target.closest('[data-id]');
@@ -573,7 +607,7 @@ $('#main').addEventListener('change', e => { if (e.target.id === 'importFile') i
 const ed = $('#editor'), edTitle = $('#edTitle'), edText = $('#edText'), edList = $('#edList');
 function newNote(type) {
   const now = Date.now();
-  const n = {id:uid(), type, title:'', body:'', color:'none', pinned:false, tags: tagFilter ? [tagFilter] : [], items: type === 'list' ? [{id:uid(), text:'', done:false}] : [], reminder:null, archived: view === 'archive', trashed:null, created:now, updated:now};
+  const n = {id:uid(), type, title:'', body:'', color:'none', pinned:false, tags: tagFilter ? [tagFilter] : [], items: type === 'list' ? [{id:uid(), text:'', done:false}] : [], ink: [], inkH: 1400, reminder:null, archived: view === 'archive', trashed:null, created:now, updated:now};
   notes.unshift(n);
   openEditor(n.id, true);
 }
@@ -586,7 +620,8 @@ function openEditor(id, fresh) {
   pushNav();
   requestAnimationFrame(() => {
     autosize(edTitle); autosize(edText);
-    if (fresh) (editing.type === 'list' ? edList.querySelector('textarea') : edText).focus();
+    if (editing.type === 'draw') sizeInk();
+    else if (fresh) (editing.type === 'list' ? edList.querySelector('textarea') : edText).focus();
   });
 }
 function paintEditor() {
@@ -604,7 +639,12 @@ function paintEditor() {
   if (n.reminder) info.push(`<span class="pill ${isLate(n) ? 'late' : 'alarm'}" data-act="alarm">${ic(n.reminder.repeat!=='none'?'repeat':'bell')}${esc(relWhen(whenOf(n.reminder)))}${n.reminder.repeat!=='none' ? ' · ' + REPEAT[n.reminder.repeat] : ''}</span>`);
   n.tags.forEach(t => info.push(`<span class="pill" data-tagx="${esc(t)}">${esc(t)}<span class="x" aria-label="Etiketi kaldır">✕</span></span>`));
   $('#edInfo').innerHTML = info.join('');
-  edText.classList.toggle('hidden', n.type === 'list');
+  edText.classList.toggle('hidden', n.type !== 'text');
+  $('#edInk').classList.toggle('hidden', n.type !== 'draw');
+  $('#inkTools').classList.toggle('hidden', n.type !== 'draw');
+  $('#edCheck').classList.toggle('hidden', n.type === 'draw');
+  $('#edMic').classList.toggle('hidden', n.type === 'draw' || !SR);
+  if (n.type === 'draw') paintInkTools();
   edList.classList.toggle('hidden', n.type !== 'list');
   if (n.type === 'list') paintList();
 }
@@ -623,7 +663,7 @@ function touch() {
   $('#edStamp').textContent = relEdit(editing.updated);
 }
 edTitle.addEventListener('input', () => { editing.title = edTitle.value.replace(/\n/g, ' '); autosize(edTitle); touch(); });
-edTitle.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); (editing.type === 'list' ? edList.querySelector('textarea') : edText)?.focus(); } });
+edTitle.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (editing.type === 'draw') return edTitle.blur(); (editing.type === 'list' ? edList.querySelector('textarea') : edText)?.focus(); } });
 edText.addEventListener('input', () => { editing.body = edText.value; autosize(edText); touch(); });
 
 edList.addEventListener('input', e => {
@@ -663,7 +703,7 @@ function toggleType() {
 
 function closeEditor(fromPop) {
   if (!editing) return;
-  stopMic();
+  stopMic(); inkOps = []; inkRedo = []; cur = null; ptrs.clear();
   const n = editing; editing = null;
   ed.classList.remove('open'); ed.setAttribute('aria-hidden', 'true');
   document.activeElement?.blur();
@@ -701,7 +741,6 @@ $('#edInfo').addEventListener('click', e => {
 /* ---------- voice dictation ---------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null;
-if (!SR) $('#edMic').classList.add('hidden');
 $('#edMic').addEventListener('click', () => rec ? stopMic() : startMic());
 function startMic() {
   if (!SR) return;
@@ -718,6 +757,152 @@ function startMic() {
   try { rec.start(); $('#edMic').classList.add('rec'); toast('Dinliyorum, konuş'); vib(10); } catch { stopMic(); }
 }
 function stopMic() { const r = rec; rec = null; try { r?.stop(); } catch {} $('#edMic').classList.remove('rec'); }
+
+/* ---------- el yazısı ---------- */
+const INK = {ink:['--ink','Mürekkep'], kobalt:['--e-kobalt','Kobalt'], cini:['--e-cini','Kırmızı'], turkuaz:['--e-turkuaz','Turkuaz'], safran:['--e-safran','Safran']};
+const SIZES = [[4,'İnce'],[7,'Orta'],[13,'Kalın']];
+const inkTool = Object.assign({mode:'pen', color:'ink', size:7}, load('notlar.ink', {}));
+const inkBase = $('#inkBase'), inkLive = $('#inkLive'), bctx = inkBase.getContext('2d'), lctx = inkLive.getContext('2d');
+let inkScale = 1, ptrs = new Map(), cur = null, inkOps = [], inkRedo = [], penSeen = false;
+const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const inkColor = k => cssVar((INK[k] || INK.ink)[0]);
+
+function sizeInk() {
+  if (!editing || editing.type !== 'draw') return;
+  const w = $('#inkWrap').clientWidth, h = Math.round(editing.inkH * w / 1000), dpr = Math.min(devicePixelRatio || 1, 3);
+  [inkBase, inkLive].forEach(c => { c.style.width = w + 'px'; c.style.height = h + 'px'; c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); });
+  inkScale = w / 1000;
+  [bctx, lctx].forEach(x => x.setTransform(dpr * inkScale, 0, 0, dpr * inkScale, 0, 0));
+  redrawBase();
+}
+function tracePath(ctx, p) {
+  ctx.beginPath(); ctx.moveTo(p[0], p[1]);
+  if (p.length <= 4) { ctx.lineTo(p[p.length - 2] + .01, p[p.length - 1]); return; }
+  for (let i = 2; i < p.length - 2; i += 2) ctx.quadraticCurveTo(p[i], p[i + 1], (p[i] + p[i + 2]) / 2, (p[i + 1] + p[i + 3]) / 2);
+  ctx.lineTo(p[p.length - 2], p[p.length - 1]);
+}
+function drawStroke(ctx, s) {
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = inkColor(s.c); ctx.lineWidth = s.w; if (s.h) ctx.globalAlpha = .35;
+  tracePath(ctx, s.p); ctx.stroke(); ctx.restore();
+}
+function clearCtx(ctx, c) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height); ctx.restore(); }
+function redrawBase() { if (!editing?.ink) return; clearCtx(bctx, inkBase); editing.ink.forEach(s => drawStroke(bctx, s)); }
+function drawLive() { clearCtx(lctx, inkLive); if (cur && cur.p) drawStroke(lctx, cur); }
+
+function pathD(p) {
+  if (p.length <= 4) return `M${p[0]} ${p[1]}L${p[p.length - 2] + .01} ${p[p.length - 1]}`;
+  let d = `M${p[0]} ${p[1]}`;
+  for (let i = 2; i < p.length - 2; i += 2) d += `Q${p[i]} ${p[i + 1]} ${(p[i] + p[i + 2]) / 2} ${(p[i + 1] + p[i + 3]) / 2}`;
+  return d + `L${p[p.length - 2]} ${p[p.length - 1]}`;
+}
+function inkSVG(n) {
+  if (!n.ink?.length) return '';
+  let maxY = 0; n.ink.forEach(s => { for (let i = 1; i < s.p.length; i += 2) maxY = Math.max(maxY, s.p[i]); });
+  const H = Math.min(Math.max(maxY + 40, 300), 1400);
+  return `<svg class="inkprev" viewBox="0 0 1000 ${H}" preserveAspectRatio="xMidYMin meet" aria-label="El yazısı not">${n.ink.map(s =>
+    `<path d="${pathD(s.p)}" fill="none" stroke="var(${(INK[s.c] || INK.ink)[0]})" stroke-width="${s.w}" stroke-linecap="round" stroke-linejoin="round"${s.h ? ' opacity=".35"' : ''}/>`).join('')}</svg>`;
+}
+
+function inkPoint(e) { const r = inkLive.getBoundingClientRect(); return [Math.round((e.clientX - r.left) / inkScale), Math.round((e.clientY - r.top) / inkScale)]; }
+function eraseAt(x, y) {
+  const hit = [];
+  editing.ink.forEach((s, i) => { const r = s.w / 2 + 14; for (let k = 0; k < s.p.length; k += 2) if (Math.hypot(s.p[k] - x, s.p[k + 1] - y) < r) { hit.push(i); break; } });
+  if (!hit.length) return;
+  hit.reverse().forEach(i => { inkOps.push({t:'del', s: editing.ink[i], i}); editing.ink.splice(i, 1); });
+  inkRedo = []; redrawBase(); touch(); vib(5); paintInkTools();
+}
+inkLive.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'pen') penSeen = true;
+  // Kalem kullanılıyorsa parmak dokunuşu çizmez, sadece kaydırır (avuç reddi)
+  if (e.pointerType === 'touch' && penSeen) { ptrs.set(e.pointerId, {y: e.clientY, scroll: true}); return; }
+  try { inkLive.setPointerCapture(e.pointerId); } catch {}
+  ptrs.set(e.pointerId, {y: e.clientY});
+  if (ptrs.size > 1) { cur = null; drawLive(); return; }
+  document.activeElement?.blur?.();
+  const [x, y] = inkPoint(e);
+  if (inkTool.mode === 'erase') { cur = {erase: true}; eraseAt(x, y); return; }
+  cur = {c: inkTool.color, w: inkTool.mode === 'hl' ? 30 : inkTool.size, p: [x, y]};
+  if (inkTool.mode === 'hl') cur.h = 1;
+  drawLive();
+});
+inkLive.addEventListener('pointermove', e => {
+  const st = ptrs.get(e.pointerId); if (!st) return;
+  if (st.scroll || ptrs.size > 1) { $('#edBody').scrollTop -= (e.clientY - st.y) / (st.scroll ? 1 : ptrs.size) * (st.scroll ? 1 : 2); st.y = e.clientY; return; }
+  if (!cur) return;
+  const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+  for (const ev of (evs.length ? evs : [e])) {
+    const [x, y] = inkPoint(ev);
+    if (cur.erase) { eraseAt(x, y); continue; }
+    const p = cur.p; if (Math.hypot(x - p[p.length - 2], y - p[p.length - 1]) < 2.5) continue;
+    p.push(x, y);
+  }
+  if (!cur.erase) drawLive();
+});
+function endPointer(e) {
+  ptrs.delete(e.pointerId);
+  if (!cur || ptrs.size) { if (!ptrs.size) cur = null; return; }
+  if (!cur.erase && cur.p) {
+    editing.ink.push(cur); inkOps.push({t:'add', s: cur}); inkRedo = [];
+    drawStroke(bctx, cur);
+    let maxY = 0; for (let i = 1; i < cur.p.length; i += 2) maxY = Math.max(maxY, cur.p[i]);
+    if (maxY > editing.inkH - 160) { editing.inkH += 600; sizeInk(); }
+    touch(); paintInkTools();
+  }
+  cur = null; drawLive();
+}
+inkLive.addEventListener('pointerup', endPointer);
+inkLive.addEventListener('pointercancel', endPointer);
+$('#inkMore').addEventListener('click', () => { editing.inkH += 700; touch(); sizeInk(); $('#edBody').scrollBy({top: 300, behavior: 'smooth'}); });
+
+function inkUndo(redo) {
+  const from = redo ? inkRedo : inkOps, to = redo ? inkOps : inkRedo;
+  const op = from.pop(); if (!op) return;
+  if (op.t === 'clear') editing.ink = redo ? [] : op.list.slice();
+  else if ((op.t === 'add') === !!redo) { if (op.t === 'add') editing.ink.push(op.s); else editing.ink.splice(op.i, 0, op.s); }
+  else { const i = editing.ink.indexOf(op.s); if (i >= 0) editing.ink.splice(i, 1); }
+  to.push(op); vib(6); redrawBase(); touch(); paintInkTools();
+}
+function paintInkTools() {
+  const t = inkTool, b = (k, icon, label) => `<button class="iconbtn ${t.mode === k ? 'on' : ''}" data-mode="${k}" aria-label="${label}" aria-pressed="${t.mode === k}">${ic(icon)}</button>`;
+  const si = Math.max(0, SIZES.findIndex(x => x[0] === t.size)), dim = 'disabled style="opacity:.35"';
+  $('#inkTools').innerHTML = b('pen', 'pen', 'Kalem') + b('hl', 'marker', 'Fosforlu kalem') + b('erase', 'eraser', 'Silgi') +
+    `<button class="iconbtn" data-ink="undo" aria-label="Geri al" ${inkOps.length ? '' : dim}>${ic('undo')}</button>` +
+    `<button class="iconbtn" data-ink="redo" aria-label="Yinele" ${inkRedo.length ? '' : dim}>${ic('redo')}</button>` + '<span class="sep"></span>' +
+    Object.entries(INK).map(([k, [v, l]]) => `<button class="dot" data-color="${k}" aria-label="${l}" aria-pressed="${t.color === k && t.mode !== 'erase'}"><i style="background:var(${v})"></i></button>`).join('') +
+    `<button class="dot sz" id="inkSize" aria-label="Kalınlık: ${SIZES[si][1]}"><i style="width:${6 + si * 5}px;height:${6 + si * 5}px"></i></button><span class="sep"></span>` +
+    `<button class="iconbtn" data-ink="clear" aria-label="Sayfayı temizle" ${editing?.ink?.length ? '' : dim}>${ic('trash')}</button>`;
+}
+$('#inkTools').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  if (b.dataset.mode) inkTool.mode = b.dataset.mode;
+  else if (b.dataset.color) { inkTool.color = b.dataset.color; if (inkTool.mode === 'erase') inkTool.mode = 'pen'; }
+  else if (b.id === 'inkSize') { const i = (Math.max(0, SIZES.findIndex(x => x[0] === inkTool.size)) + 1) % SIZES.length; inkTool.size = SIZES[i][0]; toast('Kalınlık: ' + SIZES[i][1]); }
+  else if (b.dataset.ink === 'undo') return inkUndo(false);
+  else if (b.dataset.ink === 'redo') return inkUndo(true);
+  else if (b.dataset.ink === 'clear') {
+    inkOps.push({t:'clear', list: editing.ink.slice()}); inkRedo = []; editing.ink = []; redrawBase(); touch();
+    toast('Sayfa temizlendi', 'Geri al', () => inkUndo(false));
+  }
+  vib(5);
+  try { localStorage.setItem('notlar.ink', JSON.stringify({mode: inkTool.mode === 'erase' ? 'pen' : inkTool.mode, color: inkTool.color, size: inkTool.size})); } catch {}
+  paintInkTools();
+});
+addEventListener('resize', () => { if (editing?.type === 'draw') sizeInk(); });
+
+function shareInkImage(n) {
+  let maxY = 0; n.ink.forEach(s => { for (let i = 1; i < s.p.length; i += 2) maxY = Math.max(maxY, s.p[i]); });
+  const top = n.title.trim() ? 110 : 0, H = Math.max(maxY + 60, 400) + top;
+  const c = document.createElement('canvas'); c.width = 1000; c.height = H; const x = c.getContext('2d');
+  x.fillStyle = cssVar(n.color === 'none' ? '--surface' : '--c-' + n.color); x.fillRect(0, 0, 1000, H);
+  if (top) { x.fillStyle = cssVar('--ink'); x.font = '800 54px "Bricolage Grotesque", system-ui, sans-serif'; x.fillText(n.title.slice(0, 32), 40, 76); }
+  x.translate(0, top); n.ink.forEach(s => drawStroke(x, s));
+  c.toBlob(async blob => {
+    const file = new File([blob], 'not.png', {type: 'image/png'});
+    try { if (navigator.canShare?.({files: [file]})) return await navigator.share({files: [file], title: n.title || 'Not'}); } catch { return; }
+    saveFile(blob, 'not.png'); toast('Resim indirildi');
+  }, 'image/png');
+}
 
 /* ---------- sheets ---------- */
 let sheetOpen = false;
@@ -802,15 +987,16 @@ function moreSheet() {
   const n = editing;
   const rows = n.trashed
     ? [['restore','Geri yükle','restore'],['trash','Kalıcı olarak sil','purge','danger']]
-    : [['share','Paylaş','share'],['copy','Kopyasını oluştur','dup'],['copy','Metni kopyala','copytext'],['trash','Sil','del','danger']];
+    : [...(n.type === 'draw' ? [['image','Resim olarak paylaş','img']] : []), ['share','Paylaş','share'],['copy','Kopyasını oluştur','dup'],['copy','Metni kopyala','copytext'],['trash','Sil','del','danger']];
   openSheet(`<div class="menu">${rows.map(([i,l,a,c]) => `<button class="row ${c||''}" data-a="${a}">${ic(i)}<span class="tx">${l}</span></button>`).join('')}</div>
     <p class="hint" style="text-align:center">Oluşturuldu: ${new Intl.DateTimeFormat('tr-TR',{dateStyle:'long',timeStyle:'short'}).format(n.created)}</p>`, 'Diğer işlemler');
   sheet.onclick = async e => {
     const b = e.target.closest('[data-a]'); if (!b) return;
     const a = b.dataset.a;
     if (a === 'share') { const t = noteText(n); closeSheet(); try { if (navigator.share) await navigator.share({title: n.title || 'Not', text: t}); else { await navigator.clipboard.writeText(t); toast('Paylaşım desteklenmiyor, metin kopyalandı'); } } catch {} }
+    if (a === 'img') { closeSheet(); shareInkImage(n); }
     if (a === 'copytext') { try { await navigator.clipboard.writeText(noteText(n)); toast('Metin kopyalandı'); } catch { toast('Kopyalanamadı'); } closeSheet(); }
-    if (a === 'dup') { const c = JSON.parse(JSON.stringify(n)); c.id = uid(); c.title = n.title ? n.title + ' (kopya)' : ''; c.created = c.updated = Date.now(); c.reminder = null; c.items.forEach(i => i.id = uid()); notes.unshift(c); persist(); closeSheet(true); closeEditor(); toast('Kopya oluşturuldu'); }
+    if (a === 'dup') { const c = JSON.parse(JSON.stringify(n)); c.id = uid(); c.title = n.title ? n.title + ' (kopya)' : ''; c.created = c.updated = Date.now(); c.reminder = null; c.items.forEach(i => i.id = uid()); if (c.ink) c.ink = JSON.parse(JSON.stringify(n.ink)); notes.unshift(c); persist(); closeSheet(true); closeEditor(); toast('Kopya oluşturuldu'); }
     if (a === 'del') { n.trashed = Date.now(); n.pinned = false; persist(); closeSheet(true); closeEditor();
       toast('Not çöp kutusuna taşındı', 'Geri al', () => { n.trashed = null; persist(); render(); }); }
     if (a === 'restore') { n.trashed = null; persist(); closeSheet(true); closeEditor(); toast('Not geri yüklendi'); }
@@ -823,7 +1009,7 @@ function confirmSheet(title, sub, cta, fn) {
   sheet.onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; closeSheet(); if (b.dataset.c === '1') fn(); };
 }
 
-const noteText = n => [n.title, n.type === 'list' ? n.items.map(i => (i.done ? '☑ ' : '☐ ') + i.text).join('\n') : n.body].filter(s => s && s.trim()).join('\n\n');
+const noteText = n => [n.title, n.type === 'draw' ? '(El yazısı not)' : n.type === 'list' ? n.items.map(i => (i.done ? '☑ ' : '☐ ') + i.text).join('\n') : n.body].filter(s => s && s.trim()).join('\n\n');
 
 /* ---------- calendar export ---------- */
 const RR = {daily:'FREQ=DAILY', weekdays:'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', weekly:'FREQ=WEEKLY', monthly:'FREQ=MONTHLY', yearly:'FREQ=YEARLY'};
@@ -861,7 +1047,7 @@ function importData(file) {
       if (!Array.isArray(list)) throw 0;
       const ids = new Set(notes.map(n => n.id)); let added = 0;
       list.forEach(n => { if (!n || typeof n !== 'object' || ids.has(n.id)) return;
-        notes.push(Object.assign({id:uid(), type:'text', title:'', body:'', color:'none', pinned:false, tags:[], items:[], reminder:null, archived:false, trashed:null, created:Date.now(), updated:Date.now()}, n)); added++; });
+        notes.push(Object.assign({id:uid(), type:'text', title:'', body:'', color:'none', pinned:false, tags:[], items:[], ink:[], inkH:1400, reminder:null, archived:false, trashed:null, created:Date.now(), updated:Date.now()}, n)); added++; });
       persist(); render(); toast(added ? added + ' not geri yüklendi' : 'Yeni not bulunamadı, hepsi zaten var');
     } catch { toast('Dosya okunamadı. Notlar yedek dosyası seç.'); }
   };
