@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Notlar v1.3</title>
+<title>Notlar</title>
 <meta name="description" content="Not al, liste tut, hatırlatma kur. Çevrimdışı çalışır.">
 <meta name="author" content="Mehmet Karadeniz, 2026-2027">
 <meta name="theme-color" content="#F2F5F5" media="(prefers-color-scheme: light)">
@@ -295,7 +295,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
   <div class="hello">
     <div>
       <p class="day" id="today"></p>
-      <h1><span id="viewTitle">Notlar</span><span class="ver" id="surumEtiket">v1.3</span></h1>
+      <h1><span id="viewTitle">Notlar</span><span class="ver" id="surumEtiket"></span></h1>
     </div>
     <span class="count" id="count"></span>
   </div>
@@ -364,6 +364,10 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 <script>
 'use strict';
 /* Notlar — Mehmet Karadeniz, 2026-2027 */
+// Sürüm tek yerde: düzeltme +0.0.1, yeni özellik +0.1 (ayrıntı CLAUDE.md). Başlık, etiket, Ayarlar ve önbellek buradan beslenir.
+const VERSION = '1.3.1';
+document.title = 'Notlar v' + VERSION;
+document.getElementById('surumEtiket').textContent = 'v' + VERSION;
 const $ = s => document.querySelector(s);
 const KEY = 'notlar.v1', SKEY = 'notlar.settings';
 const COLORS = [['none','Renksiz'],['turkuaz','Turkuaz'],['kobalt','Kobalt'],['cini','Çini kırmızısı'],['safran','Safran'],['adacayi','Adaçayı'],['erik','Erik'],['gok','Gök mavisi'],['mercan','Mercan'],['pembe','Pembe'],['lavanta','Lavanta'],['nane','Nane'],['kum','Kum'],['gri','Gri']];
@@ -581,7 +585,7 @@ function settingsHTML() {
   </div>
   ${installed ? '' : `<div class="section-t">Telefona kur</div><div class="set"><button class="row" id="installBtn">${ic('plus')}<span class="tx">Ana ekrana ekle<small>Tarayıcı menüsünden “Ana ekrana ekle”yi seçerek de kurabilirsin</small></span></button></div>`}
   <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-  <p class="about">Notlar v1.3 · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
+  <p class="about">Notlar v${VERSION} · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
 }
 
 /* ---------- navigation ---------- */
@@ -1358,7 +1362,7 @@ if (notes.length !== before) persist();
 let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(r => { swReg = r; }).catch(() => {});
+  navigator.serviceWorker.register('sw.js?v=' + VERSION).then(r => { swReg = r; }).catch(() => {});
   navigator.serviceWorker.addEventListener('message', e => {
     const d = e.data || {};
     if (d.type === 'action') { notes = load(KEY, notes); handleAction(d.id, d.action); }
