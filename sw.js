@@ -1,5 +1,5 @@
 /* Notlar servis çalışanı — Mehmet Karadeniz, 2026-2027 */
-const CACHE = 'notlar-v1.1';
+const CACHE = 'notlar-v1.2';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/badge-96.png', 'icons/maskable-512.png'];
 
 self.addEventListener('install', e => {

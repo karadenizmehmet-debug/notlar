@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Notlar v1.1</title>
+<title>Notlar v1.2</title>
 <meta name="description" content="Not al, liste tut, hatırlatma kur. Çevrimdışı çalışır.">
 <meta name="author" content="Mehmet Karadeniz, 2026-2027">
 <meta name="theme-color" content="#F2F5F5" media="(prefers-color-scheme: light)">
@@ -176,11 +176,25 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 .ink-more{display:block;margin:10px auto 0;color:var(--ink-2);font-size:14px;font-weight:600;padding:10px 16px;border-radius:12px}
 .ink-tools{display:flex;align-items:center;gap:4px;padding:6px 10px;overflow-x:auto;scrollbar-width:none;border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
 .ink-tools::-webkit-scrollbar{display:none}
+.ink-tools{gap:1px;padding:6px 6px;justify-content:space-between}
+.ink-tools .iconbtn{width:36px;height:40px;border-radius:12px}
+.ink-tools .sep{margin:0 2px}
 .ink-tools .sep{width:1px;height:24px;background:color-mix(in srgb,var(--ink) 14%,transparent);margin:0 4px;flex:none}
 .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none}
 .dot i{width:20px;height:20px;border-radius:50%;display:block}
-.dot[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
-.sz i{background:var(--ink-2)!important}
+.dot.open,.dot[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+.dot.big{width:44px;height:44px}.dot.big i{width:30px;height:30px}
+.ink-pop{display:flex;align-items:center;gap:8px;padding:10px 14px;margin:0 10px 6px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);animation:popin .16s ease}
+@keyframes popin{from{opacity:0;transform:translateY(6px)}}
+.pop-t{font-size:13px;font-weight:600;color:var(--ink-2);margin-right:4px}
+.szopt{display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 10px;border-radius:12px;font-size:12px;color:var(--ink-2)}
+.szopt[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--ink)}
+.ocr-text{width:100%;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--bg);padding:12px 14px;font-size:17px;line-height:1.5;resize:none;outline:none;min-height:110px}
+.ocr-text:focus{border-color:var(--accent)}
+.ocr-wait{display:flex;gap:8px;justify-content:center;padding:26px 0 30px}
+.ocr-wait span{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:bob 1s ease-in-out infinite}
+.ocr-wait span:nth-child(2){animation-delay:.15s}.ocr-wait span:nth-child(3){animation-delay:.3s}
+@keyframes bob{50%{transform:translateY(-8px);opacity:.5}}
 .inkprev{display:block;width:100%;height:auto;max-height:240px;margin-top:2px}
 .ink-hint{font-size:12.5px;color:var(--ink-3);text-align:center;margin:8px 0 0}
 
@@ -232,7 +246,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 
 .toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 160px);transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 16px 12px 18px;border-radius:14px;font-size:14.5px;z-index:90;opacity:0;pointer-events:none;transition:.2s;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-.toast button{color:var(--accent);font-weight:700;filter:brightness(1.4)}
+.toast button{white-space:nowrap;color:var(--accent);font-weight:700;filter:brightness(1.4)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -266,6 +280,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
     <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M8 20h12"/><path d="M5 15l9-10 6 6-8 9H9z"/><path d="M9 11l5 5"/></symbol>
     <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
     <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M3 7V5h10v2M8 5v13M6 18h4"/><path d="M14 13h7M14 17h7M14 21h4"/></symbol>
     <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L7 20"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
   </defs>
@@ -275,7 +290,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
   <div class="hello">
     <div>
       <p class="day" id="today"></p>
-      <h1><span id="viewTitle">Notlar</span><span class="ver" id="surumEtiket">v1.1</span></h1>
+      <h1><span id="viewTitle">Notlar</span><span class="ver" id="surumEtiket">v1.2</span></h1>
     </div>
     <span class="count" id="count"></span>
   </div>
@@ -324,6 +339,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
       <button class="ink-more" id="inkMore">Sayfayı uzat</button>
     </div>
   </div>
+  <div class="ink-pop hidden" id="inkPop" role="group" aria-label="Kalem ayarları"></div>
   <div class="ink-tools hidden" id="inkTools" role="toolbar" aria-label="Çizim araçları"></div>
   <div class="ed-bar">
     <button class="iconbtn" id="edColor" aria-label="Renk"><svg class="ico"><use href="#i-palette"/></svg></button>
@@ -560,7 +576,7 @@ function settingsHTML() {
   </div>
   ${installed ? '' : `<div class="section-t">Telefona kur</div><div class="set"><button class="row" id="installBtn">${ic('plus')}<span class="tx">Ana ekrana ekle<small>Tarayıcı menüsünden “Ana ekrana ekle”yi seçerek de kurabilirsin</small></span></button></div>`}
   <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-  <p class="about">Notlar v1.1 · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
+  <p class="about">Notlar v1.2 · Mehmet Karadeniz, 2026-2027<br>Notların yalnızca bu cihazda saklanır.</p>`;
 }
 
 /* ---------- navigation ---------- */
@@ -703,7 +719,7 @@ function toggleType() {
 
 function closeEditor(fromPop) {
   if (!editing) return;
-  stopMic(); inkOps = []; inkRedo = []; cur = null; ptrs.clear();
+  stopMic(); inkOps = []; inkRedo = []; cur = null; ptrs.clear(); inkPop = null;
   const n = editing; editing = null;
   ed.classList.remove('open'); ed.setAttribute('aria-hidden', 'true');
   document.activeElement?.blur();
@@ -864,30 +880,143 @@ function inkUndo(redo) {
   to.push(op); vib(6); redrawBase(); touch(); paintInkTools();
 }
 function paintInkTools() {
-  const t = inkTool, b = (k, icon, label) => `<button class="iconbtn ${t.mode === k ? 'on' : ''}" data-mode="${k}" aria-label="${label}" aria-pressed="${t.mode === k}">${ic(icon)}</button>`;
-  const si = Math.max(0, SIZES.findIndex(x => x[0] === t.size)), dim = 'disabled style="opacity:.35"';
+  const t = inkTool, dim = 'disabled style="opacity:.35"';
+  const b = (k, icon, label) => `<button class="iconbtn ${t.mode === k ? 'on' : ''}" data-mode="${k}" aria-label="${label}" aria-pressed="${t.mode === k}">${ic(icon)}</button>`;
+  const si = Math.max(0, SIZES.findIndex(x => x[0] === t.size));
+  const col = INK[t.color] || INK.ink, has = editing?.ink?.length;
   $('#inkTools').innerHTML = b('pen', 'pen', 'Kalem') + b('hl', 'marker', 'Fosforlu kalem') + b('erase', 'eraser', 'Silgi') +
     `<button class="iconbtn" data-ink="undo" aria-label="Geri al" ${inkOps.length ? '' : dim}>${ic('undo')}</button>` +
-    `<button class="iconbtn" data-ink="redo" aria-label="Yinele" ${inkRedo.length ? '' : dim}>${ic('redo')}</button>` + '<span class="sep"></span>' +
-    Object.entries(INK).map(([k, [v, l]]) => `<button class="dot" data-color="${k}" aria-label="${l}" aria-pressed="${t.color === k && t.mode !== 'erase'}"><i style="background:var(${v})"></i></button>`).join('') +
-    `<button class="dot sz" id="inkSize" aria-label="Kalınlık: ${SIZES[si][1]}"><i style="width:${6 + si * 5}px;height:${6 + si * 5}px"></i></button><span class="sep"></span>` +
-    `<button class="iconbtn" data-ink="clear" aria-label="Sayfayı temizle" ${editing?.ink?.length ? '' : dim}>${ic('trash')}</button>`;
+    `<button class="iconbtn" data-ink="redo" aria-label="Yinele" ${inkRedo.length ? '' : dim}>${ic('redo')}</button>` +
+    '<span class="sep"></span>' +
+    `<button class="dot ${inkPop === 'color' ? 'open' : ''}" data-pop="color" aria-label="Renk: ${col[1]}" aria-expanded="${inkPop === 'color'}"><i style="background:var(${col[0]})"></i></button>` +
+    `<button class="dot ${inkPop === 'size' ? 'open' : ''}" data-pop="size" aria-label="Kalınlık: ${SIZES[si][1]}" aria-expanded="${inkPop === 'size'}">${sizeSvg(t.size)}</button>` +
+    '<span class="sep"></span>' +
+    `<button class="iconbtn" data-ink="ocr" aria-label="Metne çevir" ${has ? '' : dim}>${ic('text')}</button>` +
+    `<button class="iconbtn" data-ink="clear" aria-label="Sayfayı temizle" ${has ? '' : dim}>${ic('trash')}</button>`;
+  const pop = $('#inkPop');
+  pop.classList.toggle('hidden', !inkPop);
+  if (inkPop === 'color') pop.innerHTML = `<span class="pop-t">Renk</span>` + Object.entries(INK).map(([k, [v, l]]) =>
+    `<button class="dot big" data-color="${k}" aria-label="${l}" aria-pressed="${t.color === k}"><i style="background:var(${v})"></i></button>`).join('');
+  if (inkPop === 'size') pop.innerHTML = `<span class="pop-t">Kalınlık</span>` + SIZES.map(([w, l]) =>
+    `<button class="szopt" data-size="${w}" aria-pressed="${t.size === w}">${sizeSvg(w)}<span>${l}</span></button>`).join('');
 }
+function sizeSvg(w) {
+  const col = INK[inkTool.color] || INK.ink;
+  return `<svg viewBox="0 0 34 34" width="30" height="30" aria-hidden="true"><path d="M6 22c5-9 9-9 11-4s6 5 11-4" fill="none" stroke="var(${col[0]})" stroke-width="${w / 3.2 + .6}" stroke-linecap="round"/></svg>`;
+}
+let inkPop = null;
+function saveInkTool() { try { localStorage.setItem('notlar.ink', JSON.stringify({mode: inkTool.mode === 'erase' ? 'pen' : inkTool.mode, color: inkTool.color, size: inkTool.size})); } catch {} }
 $('#inkTools').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
+  vib(5);
+  if (b.dataset.pop) { inkPop = inkPop === b.dataset.pop ? null : b.dataset.pop; return paintInkTools(); }
+  inkPop = null;
   if (b.dataset.mode) inkTool.mode = b.dataset.mode;
-  else if (b.dataset.color) { inkTool.color = b.dataset.color; if (inkTool.mode === 'erase') inkTool.mode = 'pen'; }
-  else if (b.id === 'inkSize') { const i = (Math.max(0, SIZES.findIndex(x => x[0] === inkTool.size)) + 1) % SIZES.length; inkTool.size = SIZES[i][0]; toast('Kalınlık: ' + SIZES[i][1]); }
   else if (b.dataset.ink === 'undo') return inkUndo(false);
   else if (b.dataset.ink === 'redo') return inkUndo(true);
+  else if (b.dataset.ink === 'ocr') { paintInkTools(); return ocrSheet(); }
   else if (b.dataset.ink === 'clear') {
     inkOps.push({t:'clear', list: editing.ink.slice()}); inkRedo = []; editing.ink = []; redrawBase(); touch();
     toast('Sayfa temizlendi', 'Geri al', () => inkUndo(false));
   }
-  vib(5);
-  try { localStorage.setItem('notlar.ink', JSON.stringify({mode: inkTool.mode === 'erase' ? 'pen' : inkTool.mode, color: inkTool.color, size: inkTool.size})); } catch {}
-  paintInkTools();
+  saveInkTool(); paintInkTools();
 });
+$('#inkPop').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.color) { inkTool.color = b.dataset.color; if (inkTool.mode === 'erase') inkTool.mode = 'pen'; }
+  if (b.dataset.size) { inkTool.size = +b.dataset.size; if (inkTool.mode === 'erase') inkTool.mode = 'pen'; }
+  inkPop = null; vib(5); saveInkTool(); paintInkTools();
+});
+inkLive.addEventListener('pointerdown', () => { if (inkPop) { inkPop = null; paintInkTools(); } }, true);
+
+/* ---------- el yazısını metne çevirme ---------- */
+// Satırlara ayır: dikey olarak örtüşen çizgiler aynı satırdır
+function inkLines(ink) {
+  const items = ink.filter(s => !s.h).map((s, order) => {
+    let y0 = 1e9, y1 = -1e9; for (let i = 1; i < s.p.length; i += 2) { y0 = Math.min(y0, s.p[i]); y1 = Math.max(y1, s.p[i]); }
+    return {s, y0, y1, order};
+  }).sort((a, b) => a.y0 - b.y0);
+  const lines = [];
+  items.forEach(it => {
+    const h = Math.max(it.y1 - it.y0, 8), mid = (it.y0 + it.y1) / 2;
+    const line = lines.find(l => (mid >= l.y0 - 10 && mid <= l.y1 + 10) || (Math.min(l.y1, it.y1) - Math.max(l.y0, it.y0)) > h * .4);
+    if (line) { line.items.push(it); line.y0 = Math.min(line.y0, it.y0); line.y1 = Math.max(line.y1, it.y1); }
+    else lines.push({y0: it.y0, y1: it.y1, items: [it]});
+  });
+  // Küçük işaretler (i noktası, ğ/ş işaretleri) ayrı satır sayılmasın: en yakın satıra kat
+  const big = lines.filter(l => l.y1 - l.y0 > 25 || l.items.length > 2), small = lines.filter(l => !big.includes(l));
+  small.forEach(l => { const m = (l.y0 + l.y1) / 2; const t = big.reduce((a, b) => !a || Math.abs((b.y0 + b.y1) / 2 - m) < Math.abs((a.y0 + a.y1) / 2 - m) ? b : a, null);
+    if (t) { t.items.push(...l.items); t.y0 = Math.min(t.y0, l.y0); t.y1 = Math.max(t.y1, l.y1); } else big.push(l); });
+  return big.sort((a, b) => a.y0 - b.y0).map(l => ({y0: l.y0, y1: l.y1, strokes: l.items.sort((a, b) => a.order - b.order).map(i => i.s)}));
+}
+async function recognizeNative(lines) {
+  if (!navigator.createHandwritingRecognizer) return null;
+  try {
+    const q = await navigator.queryHandwritingRecognizer?.({languages: ['tr']}); if (!q) return null;
+    const rec = await navigator.createHandwritingRecognizer({languages: ['tr']}), out = [];
+    for (const l of lines) {
+      const d = rec.startDrawing({recognitionType: 'text', inputType: penSeen ? 'stylus' : 'touch'});
+      l.strokes.forEach(s => { const st = new HandwritingStroke(); for (let i = 0; i < s.p.length; i += 2) st.addPoint({x: s.p[i], y: s.p[i + 1], t: i * 8}); d.addStroke(st); });
+      const pr = await d.getPrediction(); out.push(pr?.[0]?.text || ''); d.clear();
+    }
+    rec.finish(); return out;
+  } catch { return null; }
+}
+async function recognizeGoogle(lines) {
+  const out = [];
+  for (const l of lines) {
+    let t = 0;
+    const ink = l.strokes.map(s => { const xs = [], ys = [], ts = []; for (let i = 0; i < s.p.length; i += 2) { xs.push(s.p[i]); ys.push(s.p[i + 1] - l.y0 + 20); ts.push(t += 12); } t += 150; return [xs, ys, ts]; });
+    const body = JSON.stringify({options: 'enable_pre_space', requests: [{writing_guide: {writing_area_width: 1000, writing_area_height: Math.round(l.y1 - l.y0 + 40)}, ink, language: 'tr'}]});
+    let data = null;
+    for (const host of ['https://inputtools.google.com/request', 'https://www.google.com/inputtools/request']) {
+      try {
+        const r = await fetch(host + '?ime=handwriting&app=mobilesearch&cs=1&oe=UTF-8', {method: 'POST', headers: {'Content-Type': 'application/json'}, body});
+        if (r.ok) { data = await r.json(); break; }
+      } catch {}
+    }
+    if (!data || data[0] !== 'SUCCESS') throw new Error('tanima');
+    out.push(data[1]?.[0]?.[1]?.[0] || '');
+  }
+  return out;
+}
+async function ocrSheet() {
+  const n = editing; if (!n?.ink?.length) return;
+  openSheet(`<h2>Metne çevir</h2><p class="sub" id="ocrSub">El yazın okunuyor…</p><div class="ocr-wait" aria-hidden="true"><span></span><span></span><span></span></div>`, 'Metne çevir');
+  sheet.onclick = null;
+  const lines = inkLines(n.ink);
+  let res = null, err = '';
+  try { res = await recognizeNative(lines) || await recognizeGoogle(lines); }
+  catch { err = navigator.onLine ? 'Yazı okunamadı. Biraz daha büyük ve düz yazıp yeniden dene.' : 'İnternet bağlantısı yok. Metne çevirmek için bağlantı gerekiyor.'; }
+  if (!sheetOpen || editing !== n) return;
+  const text = res ? res.map(s => s.trim()).filter(Boolean).join('\n') : '';
+  if (!text) {
+    openSheet(`<h2>Metne çevir</h2><p class="sub">${err || 'Okunabilir yazı bulunamadı. Daha belirgin yazıp yeniden dene.'}</p><div class="btns"><button class="btn" data-o="close">Kapat</button><button class="btn pri" data-o="retry">Yeniden dene</button></div>`, 'Metne çevir');
+  } else {
+    openSheet(`<h2>Metne çevir</h2><p class="sub">Okunan metni kontrol et, gerekirse düzelt.</p>
+      <label class="field"><textarea id="ocrText" class="ocr-text" rows="5" aria-label="Okunan metin">${esc(text)}</textarea></label>
+      <div class="btns"><button class="btn" data-o="copy">Kopyala</button><button class="btn pri" data-o="new">Yeni metin notu</button></div>
+      <button class="btn" data-o="replace" style="width:100%;margin-top:10px">Bu notu metne dönüştür</button>
+      <p class="hint">El yazısı Google’ın yazı tanıma hizmetiyle okunur. Bunun için çizgiler Google’a gönderilir.</p>`, 'Metne çevir');
+    requestAnimationFrame(() => autosize($('#ocrText')));
+  }
+  sheet.onclick = async e => {
+    const b = e.target.closest('[data-o]'); if (!b) return;
+    const o = b.dataset.o, val = $('#ocrText')?.value.trim() || '';
+    if (o === 'close') return closeSheet();
+    if (o === 'retry') return ocrSheet();
+    if (o === 'copy') { try { await navigator.clipboard.writeText(val); toast('Metin kopyalandı'); } catch { toast('Kopyalanamadı'); } return; }
+    if (o === 'new') {
+      const now = Date.now(), c = {id: uid(), type: 'text', title: n.title, body: val, color: n.color, pinned: false, tags: n.tags.slice(), items: [], ink: [], inkH: 1400, reminder: null, archived: n.archived, trashed: null, created: now, updated: now};
+      notes.unshift(c); persist(); closeSheet(); toast('Metin notu oluşturuldu', 'Aç', () => { closeEditor(); setTimeout(() => openEditor(c.id), 320); });
+    }
+    if (o === 'replace') {
+      const prev = {ink: n.ink, inkH: n.inkH, body: n.body};
+      n.type = 'text'; n.body = val; n.ink = []; touch(); closeSheet(); paintEditor(); edText.value = n.body; requestAnimationFrame(() => autosize(edText));
+      toast('Not metne dönüştürüldü', 'Geri al', () => { Object.assign(n, prev, {type: 'draw'}); n.updated = Date.now(); persist(); if (editing === n) { paintEditor(); sizeInk(); } else render(); });
+    }
+  };
+}
 addEventListener('resize', () => { if (editing?.type === 'draw') sizeInk(); });
 
 function shareInkImage(n) {
