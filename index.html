@@ -365,7 +365,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 'use strict';
 /* Notlar — Mehmet Karadeniz, 2026-2027 */
 // Sürüm tek yerde: düzeltme +0.0.1, yeni özellik +0.1 (ayrıntı CLAUDE.md). Başlık, etiket, Ayarlar ve önbellek buradan beslenir.
-const VERSION = '1.3.1';
+const VERSION = '1.4';
 document.title = 'Notlar v' + VERSION;
 document.getElementById('surumEtiket').textContent = 'v' + VERSION;
 const $ = s => document.querySelector(s);
@@ -571,6 +571,9 @@ function settingsHTML() {
   <div class="section-t">Görünüm</div>
   <div class="set"><div class="row"><span class="tx">Tema</span>
     <div class="seg" role="group" aria-label="Tema">${[['auto','Otomatik'],['light','Açık'],['dark','Koyu']].map(([k,l]) => `<button data-theme="${k}" aria-pressed="${S.theme===k}">${l}</button>`).join('')}</div></div></div>
+  <div class="set">
+    <button class="row" id="shareApp">${ic('share')}<span class="tx">Adresi paylaş<small>Uygulamanın adresini başkalarına gönder</small></span></button>
+  </div>
   <div class="section-t">Hatırlatmalar</div>
   <div class="set">
     <button class="row" id="askPerm">${ic('bell')}<span class="tx">Bildirim izni<small>${permTx}</small></span></button>
@@ -645,6 +648,11 @@ $('#main').addEventListener('click', async e => {
   const t = e.target.closest('button'); if (!t) return;
   if (t.dataset.theme) { S.theme = t.dataset.theme; saveSettings(); applyTheme(); render(); return; }
   switch (t.id) {
+    case 'shareApp': {
+      const u = location.href.split(/[?#]/)[0];
+      if (navigator.share) { try { await navigator.share({title: document.title, url: u}); } catch {} break; }
+      try { await navigator.clipboard.writeText(u); toast('Adres kopyalandı'); } catch { toast('Adres kopyalanamadı: ' + u); }
+      break; }
     case 'askPerm': await askPermission(); render(); break;
     case 'testAlarm':
       if (!(await askPermission())) return;
