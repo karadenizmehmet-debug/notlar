@@ -179,6 +179,12 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 .mtab.full small{color:var(--accent);font-weight:700}
 .mtab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .mtab[aria-pressed="true"] small{color:inherit;opacity:.8}
+.cl li.done .dt.none{background:none}
+.cl li.sub{padding-left:34px}
+.cl .ind{display:none;color:var(--ink-3);width:32px;height:32px;place-items:center;flex:none}
+.cl .ind svg{width:18px;height:18px}
+.cl li.act .ind{display:grid}
+.card li.sub{padding-left:20px}
 .card li .d{margin-left:auto;padding-left:6px;font-size:12px;color:var(--ink-3);flex:none;text-decoration:none}
 .card li .d.late{color:var(--danger)}
 .ed-bar{display:flex;align-items:center;gap:2px;padding:6px 8px calc(var(--safe-b) + 6px);border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
@@ -308,6 +314,8 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
     <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></symbol>
     <symbol id="i-text" viewBox="0 0 24 24"><path d="M3 7V5h10v2M8 5v13M6 18h4"/><path d="M14 13h7M14 17h7M14 21h4"/></symbol>
     <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L7 20"/></symbol>
+    <symbol id="i-indent" viewBox="0 0 24 24"><path d="M4 5v6a3 3 0 0 0 3 3h11"/><path d="m14 10 4 4-4 4"/></symbol>
+    <symbol id="i-outdent" viewBox="0 0 24 24"><path d="M20 5v6a3 3 0 0 1-3 3H6"/><path d="m10 10-4 4 4 4"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
   </defs>
 </svg>
@@ -387,7 +395,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 'use strict';
 /* Notlar — Mehmet Karadeniz, 2026-2027 */
 // Sürüm tek yerde: düzeltme +0.0.1, yeni özellik +0.1 (ayrıntı CLAUDE.md). Başlık, etiket, Ayarlar ve önbellek buradan beslenir.
-const VERSION = '1.5';
+const VERSION = '1.6';
 document.title = 'Notlar v' + VERSION;
 document.getElementById('surumEtiket').textContent = 'v' + VERSION;
 const $ = s => document.querySelector(s);
@@ -482,6 +490,16 @@ const sortItems = (n, arr, m) => arr.map((i, k) => [i, k, itemDate(n, i, m) ?? I
 const fmtMon = new Intl.DateTimeFormat('tr-TR', {month:'short'});
 const fmtMonLong = new Intl.DateTimeFormat('tr-TR', {month:'long'});
 const dateState = (n, i, m) => { const t = itemDate(n, i, m); if (t == null || isDone(n, i, m)) return ''; const d = startOfDay(Date.now()); return t < d ? 'late' : t === d ? 'today' : ''; };
+// Alt maddeler: item.parent = üst maddenin id'si (tek kademe). Üst madde silinmişse alt madde üst seviyeye çıkar.
+const parentOf = (n, i) => i.parent && n.items.find(p => p.id === i.parent && !p.parent) || null;
+const kidsOf = (n, id, m) => sortItems(n, n.items.filter(i => i.parent === id), m);
+const topsOf = (n, m) => sortItems(n, n.items.filter(i => !parentOf(n, i)), m);
+const treeOrder = (n, m) => topsOf(n, m).flatMap(t => [t, ...kidsOf(n, t.id, m)]);
+// Alt maddelerin hepsi işaretliyse üst madde işaretlenir, biri kalkarsa üstün işareti de kalkar
+function syncParent(n, pid, m) {
+  const p = n.items.find(i => i.id === pid), kids = n.items.filter(i => i.parent === pid);
+  if (p && kids.length) setDone(n, p, kids.every(k => isDone(n, k, m)), m);
+}
 const isoDay = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
 function toggleMonthly() {
   const n = editing, m = monthKey(Date.now());
@@ -517,9 +535,9 @@ function cardHTML(n) {
   const late = isLate(n);
   let content = '';
   if (n.type === 'list') {
-    const all = sortItems(n, n.items), open = all.filter(i => !isDone(n, i)), done = all.filter(i => isDone(n, i));
-    const shown = [...open, ...done].slice(0, 7);
-    content = `<ul>${shown.map(i => { const t = itemDate(n, i); return `<li class="${isDone(n, i)?'done':''}"><span class="bx"></span><span>${esc(i.text) || '&nbsp;'}</span>${t != null ? `<span class="d ${dateState(n, i)}">${fmtShort.format(t)}</span>` : ''}</li>`; }).join('')}</ul>` +
+    const tops = topsOf(n), grp = t => [t, ...kidsOf(n, t.id)];
+    const shown = [...tops.filter(t => !isDone(n, t)).flatMap(grp), ...tops.filter(t => isDone(n, t)).flatMap(grp)].slice(0, 7);
+    content = `<ul>${shown.map(i => { const t = itemDate(n, i); return `<li class="${isDone(n, i)?'done':''} ${parentOf(n, i)?'sub':''}"><span class="bx"></span><span>${esc(i.text) || '&nbsp;'}</span>${t != null ? `<span class="d ${dateState(n, i)}">${fmtShort.format(t)}</span>` : ''}</li>`; }).join('')}</ul>` +
       (n.items.length > 7 ? `<div class="more">+${n.items.length - 7} madde daha</div>` : '');
   } else if (n.type === 'draw') content = inkSVG(n);
   else if (n.body.trim()) content = `<p>${esc(n.body)}</p>`;
@@ -784,13 +802,14 @@ function paintEditor() {
   if (n.type === 'list') paintList();
 }
 function paintList() {
-  const n = editing, m = curMonth(n), all = sortItems(n, n.items), open = all.filter(i => !isDone(n, i)), done = all.filter(i => isDone(n, i));
+  const n = editing, m = curMonth(n), tops = topsOf(n), grp = t => [t, ...kidsOf(n, t.id)];
+  const open = tops.filter(t => !isDone(n, t)).flatMap(grp), done = tops.filter(t => isDone(n, t)).flatMap(grp);
   let lo = '', hi = '';
   if (n.monthly) { const [y, mo] = m.split('-').map(Number); lo = `${m}-01`; hi = `${m}-${pad(new Date(y, mo, 0).getDate())}`; }
   const dt = i => { const t = itemDate(n, i);
     return `<span class="dt ${t == null ? 'none' : dateState(n, i)}">${t == null ? ic('cal') : fmtShort.format(t)}<input type="date" class="dtin" aria-label="Tarih" value="${t == null ? '' : isoDay(t)}"${lo ? ` min="${lo}" max="${hi}"` : ''}></span>`; };
-  const li = i => { const d = isDone(n, i); return `<li data-iid="${i.id}" class="${d?'done':''}"><button class="cb" aria-label="${d?'İşareti kaldır':'Tamamlandı işaretle'}">${ic('check','')}</button>
-    <textarea rows="1" enterkeyhint="next" placeholder="Madde">${esc(i.text)}</textarea>${dt(i)}<button class="del" aria-label="Maddeyi sil">${ic('x','ico')}</button></li>`; };
+  const li = i => { const d = isDone(n, i), sub = !!parentOf(n, i); return `<li data-iid="${i.id}" class="${d?'done':''} ${sub?'sub':''} ${i.id === actItem?'act':''}"><button class="cb" aria-label="${d?'İşareti kaldır':'Tamamlandı işaretle'}">${ic('check','')}</button>
+    <textarea rows="1" enterkeyhint="next" placeholder="${sub ? 'Alt madde' : 'Madde'}">${esc(i.text)}</textarea>${dt(i)}<button class="ind" aria-label="${sub ? 'Üst maddeye çevir' : 'Alt madde yap'}">${ic(sub ? 'outdent' : 'indent')}</button><button class="del" aria-label="Maddeyi sil">${ic('x','ico')}</button></li>`; };
   let months = '';
   if (n.monthly) {
     const y = +m.slice(0, 4), now = monthKey(Date.now());
@@ -801,7 +820,7 @@ function paintList() {
       <button class="nav" data-yr="1" aria-label="Sonraki yıl" style="transform:scaleX(-1)">${ic('back')}</button></div>`;
   }
   edList.innerHTML = months + `<ul class="cl">${open.map(li).join('')}</ul><button class="cl-add" id="clAdd">${ic('plus')}Madde ekle</button>` +
-    (done.length ? `<div class="done-h">${done.length} tamamlandı</div><ul class="cl">${done.map(li).join('')}</ul>` : '');
+    (done.length ? `<div class="done-h">${tops.filter(t => isDone(n, t)).length} tamamlandı</div><ul class="cl">${done.map(li).join('')}</ul>` : '');
   edList.querySelectorAll('textarea').forEach(autosize);
   edList.querySelector('.mtab[aria-pressed="true"]')?.scrollIntoView({block:'nearest', inline:'center'});
 }
@@ -822,7 +841,10 @@ edList.addEventListener('input', e => {
 edList.addEventListener('keydown', e => {
   const li = e.target.closest('li'); if (!li || e.target.tagName !== 'TEXTAREA') return;
   const idx = editing.items.findIndex(i => i.id === li.dataset.iid);
-  if (e.key === 'Enter') { e.preventDefault(); addItem(idx + 1); }
+  const it = editing.items[idx];
+  if (e.key === 'Enter') { e.preventDefault(); addItem(idx + 1, parentOf(editing, it)?.id); }
+  if (e.key === 'Tab') { e.preventDefault(); return indentItem(it, !e.shiftKey); }
+  if (e.key === 'Backspace' && !e.target.value && parentOf(editing, it)) { e.preventDefault(); return indentItem(it, false); }
   if (e.key === 'Backspace' && !e.target.value && editing.items.length > 1) {
     e.preventDefault(); const prev = li.previousElementSibling?.dataset.iid;
     editing.items.splice(idx, 1); touch(); paintList();
@@ -837,8 +859,14 @@ edList.addEventListener('click', e => {
   if (e.target.closest('#clAdd')) { const open = n.items.filter(i => !isDone(n, i)); return addItem(open.length ? n.items.indexOf(open.at(-1)) + 1 : n.items.length); }
   const li = e.target.closest('li'); if (!li) return;
   const idx = n.items.findIndex(i => i.id === li.dataset.iid);
-  if (e.target.closest('.cb')) { const it = n.items[idx], v = !isDone(n, it); setDone(n, it, v); vib(v ? [8,40,8] : 6); touch(); paintList(); }
-  if (e.target.closest('.del')) { editing.items.splice(idx, 1); touch(); paintList(); }
+  if (e.target.closest('.cb')) {
+    const it = n.items[idx], v = !isDone(n, it); setDone(n, it, v);
+    n.items.filter(k => k.parent === it.id).forEach(k => setDone(n, k, v));
+    const p = parentOf(n, it); if (p) syncParent(n, p.id);
+    vib(v ? [8,40,8] : 6); touch(); paintList(); return;
+  }
+  if (e.target.closest('.ind')) return indentItem(n.items[idx], !parentOf(n, n.items[idx]));
+  if (e.target.closest('.del')) { const id = n.items[idx].id, p = parentOf(n, n.items[idx]); n.items.splice(idx, 1); n.items.forEach(k => { if (k.parent === id) k.parent = null; }); if (p) syncParent(n, p.id); touch(); paintList(); }
 });
 edList.addEventListener('change', e => {
   if (!e.target.classList.contains('dtin')) return;
@@ -846,7 +874,25 @@ edList.addEventListener('change', e => {
   if (editing.monthly) it.day = v ? +v.slice(8, 10) : null; else it.date = v || null;
   touch(); paintList();
 });
-function addItem(at) { const it = {id:uid(), text:'', done:false, ...(editing.monthly ? {doneM:{}} : {})}; editing.items.splice(at, 0, it); touch(); paintList(); focusItem(it.id); }
+let actItem = null;
+edList.addEventListener('focusin', e => {
+  const li = e.target.closest('li'); if (!li || li.classList.contains('act')) return;
+  edList.querySelectorAll('li.act').forEach(x => x.classList.remove('act')); li.classList.add('act'); actItem = li.dataset.iid;
+});
+// Alt madde yap / üst maddeye çevir; üst madde, görünen sırada bir önceki üst maddedir
+function indentItem(it, on) {
+  const n = editing;
+  if (on) {
+    const tops = topsOf(n).filter(t => isDone(n, t) === isDone(n, it) || t === it), k = tops.indexOf(it);
+    const p = k > 0 ? tops[k - 1] : null; if (!p) return toast('Önce üstüne bir madde ekle');
+    n.items.forEach(x => { if (x.parent === it.id) x.parent = p.id; });
+    it.parent = p.id; syncParent(n, p.id);
+  } else {
+    const pid = parentOf(n, it)?.id; it.parent = null; if (pid) syncParent(n, pid);
+  }
+  vib(6); touch(); paintList(); focusItem(it.id);
+}
+function addItem(at, parent) { const it = {id:uid(), text:'', done:false, ...(parent ? {parent} : {}), ...(editing.monthly ? {doneM:{}} : {})}; editing.items.splice(at, 0, it); touch(); paintList(); focusItem(it.id); }
 function focusItem(id) { const t = edList.querySelector(`li[data-iid="${id}"] textarea`); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
 
 function toggleType() {
@@ -855,7 +901,7 @@ function toggleType() {
     const lines = n.body.split('\n').map(s => s.replace(/^\s*([-*•]|\d+[.)])\s*/, '').trim()).filter(Boolean);
     n.items = (lines.length ? lines : ['']).map(t => ({id:uid(), text:t, done:false})); n.body = ''; n.type = 'list';
   } else {
-    n.body = sortItems(n, n.items).map(i => (isDone(n, i) ? '✓ ' : '') + i.text).filter(s => s.trim()).join('\n'); n.items = []; n.monthly = false; edMonth = null; n.type = 'text'; edText.value = n.body;
+    n.body = treeOrder(n).map(i => (parentOf(n, i) ? '  ' : '') + (isDone(n, i) ? '✓ ' : '') + i.text).filter(s => s.trim()).join('\n'); n.items = []; n.monthly = false; edMonth = null; n.type = 'text'; edText.value = n.body;
   }
   touch(); paintEditor(); requestAnimationFrame(() => autosize(edText));
 }
@@ -1331,7 +1377,7 @@ function confirmSheet(title, sub, cta, fn) {
   sheet.onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; closeSheet(); if (b.dataset.c === '1') fn(); };
 }
 
-const noteText = n => [n.title, n.type === 'draw' ? '(El yazısı not)' : n.type === 'list' ? sortItems(n, n.items).map(i => { const t = itemDate(n, i); return (isDone(n, i) ? '☑ ' : '☐ ') + i.text + (t != null ? ' (' + fmtShort.format(t) + ')' : ''); }).join('\n') : n.body].filter(s => s && s.trim()).join('\n\n');
+const noteText = n => [n.title, n.type === 'draw' ? '(El yazısı not)' : n.type === 'list' ? treeOrder(n).map(i => { const t = itemDate(n, i); return (parentOf(n, i) ? '    ' : '') + (isDone(n, i) ? '☑ ' : '☐ ') + i.text + (t != null ? ' (' + fmtShort.format(t) + ')' : ''); }).join('\n') : n.body].filter(s => s && s.trim()).join('\n\n');
 
 /* ---------- calendar export ---------- */
 const RR = {daily:'FREQ=DAILY', weekdays:'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', weekly:'FREQ=WEEKLY', monthly:'FREQ=MONTHLY', yearly:'FREQ=YEARLY'};
