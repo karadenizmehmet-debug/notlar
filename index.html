@@ -160,6 +160,27 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 .cl .del svg{width:18px;height:18px}
 .cl-add{display:flex;align-items:center;gap:10px;color:var(--ink-2);padding:10px 0;font-weight:500}
 .done-h{font-size:13px;color:var(--ink-3);margin:14px 0 2px;font-weight:600}
+.cl .dt{position:relative;flex:none;margin-top:3px;height:26px;min-width:26px;padding:0 9px;border-radius:999px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3);background:color-mix(in srgb,var(--ink) 6%,transparent);white-space:nowrap}
+.cl .dt.none{background:none;padding:0 3px;opacity:.7}
+.cl .dt svg{width:17px;height:17px}
+.cl .dt.late{color:var(--danger);background:color-mix(in srgb,var(--danger) 13%,transparent)}
+.cl .dt.today{color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent)}
+.cl li.done .dt{color:var(--ink-3);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.cl .dt input{position:absolute;inset:0;opacity:0;width:100%;height:100%;border:0;padding:0;margin:0}
+.months{display:flex;align-items:center;gap:4px;margin:0 -4px 12px}
+.months .yr{font:700 15px var(--font-d);min-width:46px;text-align:center;color:var(--ink-2)}
+.months .nav{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--ink-2);flex:none}
+.months .nav svg{width:18px;height:18px}
+.mtabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;padding:2px}
+.mtabs::-webkit-scrollbar{display:none}
+.mtab{flex:none;min-width:54px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:14px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+.mtab small{font-size:11px;font-weight:500;color:var(--ink-3)}
+.mtab.now{border-color:var(--accent);color:var(--accent)}
+.mtab.full small{color:var(--accent);font-weight:700}
+.mtab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mtab[aria-pressed="true"] small{color:inherit;opacity:.8}
+.card li .d{margin-left:auto;padding-left:6px;font-size:12px;color:var(--ink-3);flex:none;text-decoration:none}
+.card li .d.late{color:var(--danger)}
 .ed-bar{display:flex;align-items:center;gap:2px;padding:6px 8px calc(var(--safe-b) + 6px);border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
 .ed-bar .sp{flex:1}
 .ed-bar .stamp{font-size:12px;color:var(--ink-3);padding-right:8px}
@@ -349,6 +370,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
   <div class="ed-bar">
     <button class="iconbtn" id="edColor" aria-label="Renk"><svg class="ico"><use href="#i-palette"/></svg></button>
     <button class="iconbtn" id="edCheck" aria-label="Liste moduna geç"><svg class="ico"><use href="#i-list"/></svg></button>
+    <button class="iconbtn hidden" id="edMonthly" aria-label="Aylık rutin"><svg class="ico"><use href="#i-repeat"/></svg></button>
     <button class="iconbtn" id="edTag" aria-label="Etiket"><svg class="ico"><use href="#i-tag"/></svg></button>
     <button class="iconbtn" id="edMic" aria-label="Sesle yaz"><svg class="ico"><use href="#i-mic"/></svg></button>
     <span class="sp"></span>
@@ -365,7 +387,7 @@ nav.bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;
 'use strict';
 /* Notlar — Mehmet Karadeniz, 2026-2027 */
 // Sürüm tek yerde: düzeltme +0.0.1, yeni özellik +0.1 (ayrıntı CLAUDE.md). Başlık, etiket, Ayarlar ve önbellek buradan beslenir.
-const VERSION = '1.4';
+const VERSION = '1.5';
 document.title = 'Notlar v' + VERSION;
 document.getElementById('surumEtiket').textContent = 'v' + VERSION;
 const $ = s => document.querySelector(s);
@@ -435,6 +457,45 @@ function relEdit(ts) {
 }
 const whenOf = r => r.snoozeAt || r.at;
 const isLate = n => !!(n.reminder && !n.trashed && n.reminder.repeat === 'none' && n.reminder.fired && !n.reminder.snoozeAt);
+/* ---------- liste tarihleri ve aylık rutin ---------- */
+// Aylık listede maddeler her ay aynıdır; işaretler aya göre (doneM['2026-11']) tutulur, tarih ayın günü (day) olarak saklanır.
+const monthKey = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1); };
+let edMonth = null;
+const curMonth = n => (n === editing && edMonth) || monthKey(Date.now());
+const isDone = (n, i, m) => n.monthly ? !!(i.doneM && i.doneM[m || curMonth(n)]) : !!i.done;
+function setDone(n, i, v, m) {
+  if (!n.monthly) { i.done = v; return; }
+  const k = m || curMonth(n); i.doneM = i.doneM || {};
+  if (v) i.doneM[k] = true; else delete i.doneM[k];
+}
+function itemDate(n, i, m) {
+  if (n.monthly) {
+    if (!i.day) return null;
+    const [y, mo] = (m || curMonth(n)).split('-').map(Number);
+    return new Date(y, mo - 1, Math.min(i.day, new Date(y, mo, 0).getDate())).getTime();
+  }
+  if (!i.date) return null;
+  const [y, mo, d] = i.date.split('-').map(Number); return new Date(y, mo - 1, d).getTime();
+}
+// Tarihli maddeler tarih sırasıyla önde, tarihsizler kendi sırasıyla sonda
+const sortItems = (n, arr, m) => arr.map((i, k) => [i, k, itemDate(n, i, m) ?? Infinity]).sort((a, b) => (a[2] - b[2]) || a[1] - b[1]).map(x => x[0]);
+const fmtMon = new Intl.DateTimeFormat('tr-TR', {month:'short'});
+const fmtMonLong = new Intl.DateTimeFormat('tr-TR', {month:'long'});
+const dateState = (n, i, m) => { const t = itemDate(n, i, m); if (t == null || isDone(n, i, m)) return ''; const d = startOfDay(Date.now()); return t < d ? 'late' : t === d ? 'today' : ''; };
+const isoDay = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+function toggleMonthly() {
+  const n = editing, m = monthKey(Date.now());
+  if (!n.monthly) {
+    n.items.forEach(i => { const t = itemDate(n, i); i.day = t ? new Date(t).getDate() : null; i.doneM = i.done ? {[m]: true} : {}; });
+    n.monthly = true; edMonth = m;
+    toast('Aylık rutin: maddeler her ay aynı, işaretler aya göre');
+  } else {
+    n.items.forEach(i => { const t = itemDate(n, i, m); i.date = t ? isoDay(t) : null; i.done = !!(i.doneM && i.doneM[m]); });
+    n.monthly = false; edMonth = null;
+    toast('Aylık rutin kapatıldı');
+  }
+  vib(8); touch(); paintEditor();
+}
 const isEmpty = n => !n.title.trim() && !n.body.trim() && !n.items.some(i => i.text.trim()) && !(n.ink && n.ink.length);
 const allTags = () => [...new Set(notes.filter(n => !n.trashed).flatMap(n => n.tags))].sort((a,b)=>a.localeCompare(b,'tr'));
 const norm = s => s.toLocaleLowerCase('tr-TR');
@@ -456,13 +517,14 @@ function cardHTML(n) {
   const late = isLate(n);
   let content = '';
   if (n.type === 'list') {
-    const open = n.items.filter(i => !i.done), done = n.items.filter(i => i.done);
+    const all = sortItems(n, n.items), open = all.filter(i => !isDone(n, i)), done = all.filter(i => isDone(n, i));
     const shown = [...open, ...done].slice(0, 7);
-    content = `<ul>${shown.map(i => `<li class="${i.done?'done':''}"><span class="bx"></span><span>${esc(i.text) || '&nbsp;'}</span></li>`).join('')}</ul>` +
+    content = `<ul>${shown.map(i => { const t = itemDate(n, i); return `<li class="${isDone(n, i)?'done':''}"><span class="bx"></span><span>${esc(i.text) || '&nbsp;'}</span>${t != null ? `<span class="d ${dateState(n, i)}">${fmtShort.format(t)}</span>` : ''}</li>`; }).join('')}</ul>` +
       (n.items.length > 7 ? `<div class="more">+${n.items.length - 7} madde daha</div>` : '');
   } else if (n.type === 'draw') content = inkSVG(n);
   else if (n.body.trim()) content = `<p>${esc(n.body)}</p>`;
   const meta = [];
+  if (n.type === 'list' && n.monthly) meta.push(`<span class="pill">${ic('repeat')}${fmtMonLong.format(Date.now())} ${n.items.filter(i => isDone(n, i)).length}/${n.items.length}</span>`);
   if (n.reminder && !n.trashed) meta.push(`<span class="pill ${late?'late':'alarm'}">${ic(n.reminder.repeat !== 'none' ? 'repeat' : 'bell')}${esc(relWhen(whenOf(n.reminder)))}</span>`);
   n.tags.forEach(t => meta.push(`<span class="pill">${esc(t)}</span>`));
   if (n.trashed) meta.push(`<span class="pill">${Math.max(0, 30 - Math.floor((Date.now() - n.trashed) / DAY))} gün sonra silinecek</span>`);
@@ -682,6 +744,7 @@ function newNote(type) {
 }
 function openEditor(id, fresh) {
   editing = notes.find(n => n.id === id); if (!editing) return;
+  edMonth = editing.monthly ? monthKey(Date.now()) : null;
   vib(6);
   edTitle.value = editing.title; edText.value = editing.body;
   paintEditor();
@@ -700,6 +763,9 @@ function paintEditor() {
   $('#edPin').setAttribute('aria-label', n.pinned ? 'Sabitlemeyi kaldır' : 'Sabitle');
   $('#edAlarm').classList.toggle('on', !!n.reminder);
   $('#edCheck').classList.toggle('on', n.type === 'list');
+  $('#edMonthly').classList.toggle('hidden', n.type !== 'list');
+  $('#edMonthly').classList.toggle('on', !!n.monthly);
+  $('#edMonthly').setAttribute('aria-label', n.monthly ? 'Aylık rutini kapat' : 'Aylık rutin yap');
   $('#edArchive').innerHTML = ic(n.archived ? 'restore' : 'archive');
   $('#edArchive').setAttribute('aria-label', n.archived ? 'Arşivden çıkar' : 'Arşivle');
   $('#edArchive').classList.toggle('hidden', !!n.trashed);
@@ -718,12 +784,26 @@ function paintEditor() {
   if (n.type === 'list') paintList();
 }
 function paintList() {
-  const n = editing, open = n.items.filter(i => !i.done), done = n.items.filter(i => i.done);
-  const li = i => `<li data-iid="${i.id}" class="${i.done?'done':''}"><button class="cb" aria-label="${i.done?'İşareti kaldır':'Tamamlandı işaretle'}">${ic('check','')}</button>
-    <textarea rows="1" enterkeyhint="next" placeholder="Madde">${esc(i.text)}</textarea><button class="del" aria-label="Maddeyi sil">${ic('x','ico')}</button></li>`;
-  edList.innerHTML = `<ul class="cl">${open.map(li).join('')}</ul><button class="cl-add" id="clAdd">${ic('plus')}Madde ekle</button>` +
+  const n = editing, m = curMonth(n), all = sortItems(n, n.items), open = all.filter(i => !isDone(n, i)), done = all.filter(i => isDone(n, i));
+  let lo = '', hi = '';
+  if (n.monthly) { const [y, mo] = m.split('-').map(Number); lo = `${m}-01`; hi = `${m}-${pad(new Date(y, mo, 0).getDate())}`; }
+  const dt = i => { const t = itemDate(n, i);
+    return `<span class="dt ${t == null ? 'none' : dateState(n, i)}">${t == null ? ic('cal') : fmtShort.format(t)}<input type="date" class="dtin" aria-label="Tarih" value="${t == null ? '' : isoDay(t)}"${lo ? ` min="${lo}" max="${hi}"` : ''}></span>`; };
+  const li = i => { const d = isDone(n, i); return `<li data-iid="${i.id}" class="${d?'done':''}"><button class="cb" aria-label="${d?'İşareti kaldır':'Tamamlandı işaretle'}">${ic('check','')}</button>
+    <textarea rows="1" enterkeyhint="next" placeholder="Madde">${esc(i.text)}</textarea>${dt(i)}<button class="del" aria-label="Maddeyi sil">${ic('x','ico')}</button></li>`; };
+  let months = '';
+  if (n.monthly) {
+    const y = +m.slice(0, 4), now = monthKey(Date.now());
+    months = `<div class="months"><button class="nav" data-yr="-1" aria-label="Önceki yıl">${ic('back')}</button><span class="yr">${y}</span>
+      <div class="mtabs" role="toolbar" aria-label="Aylar">${Array.from({length:12}, (_, k) => {
+        const key = y + '-' + pad(k + 1), c = n.items.filter(i => isDone(n, i, key)).length, tot = n.items.filter(i => i.text.trim()).length;
+        return `<button class="mtab ${key === now ? 'now' : ''} ${tot && c >= tot ? 'full' : ''}" data-m="${key}" aria-pressed="${key === m}">${fmtMon.format(new Date(y, k, 1))}<small>${c}/${tot}</small></button>`; }).join('')}</div>
+      <button class="nav" data-yr="1" aria-label="Sonraki yıl" style="transform:scaleX(-1)">${ic('back')}</button></div>`;
+  }
+  edList.innerHTML = months + `<ul class="cl">${open.map(li).join('')}</ul><button class="cl-add" id="clAdd">${ic('plus')}Madde ekle</button>` +
     (done.length ? `<div class="done-h">${done.length} tamamlandı</div><ul class="cl">${done.map(li).join('')}</ul>` : '');
   edList.querySelectorAll('textarea').forEach(autosize);
+  edList.querySelector('.mtab[aria-pressed="true"]')?.scrollIntoView({block:'nearest', inline:'center'});
 }
 function touch() {
   editing.updated = Date.now(); persist();
@@ -736,7 +816,7 @@ edTitle.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDef
 edText.addEventListener('input', () => { editing.body = edText.value; autosize(edText); touch(); });
 
 edList.addEventListener('input', e => {
-  const li = e.target.closest('li'); if (!li) return;
+  const li = e.target.closest('li'); if (!li || e.target.tagName !== 'TEXTAREA') return;
   const it = editing.items.find(i => i.id === li.dataset.iid); it.text = e.target.value.replace(/\n/g, ' '); autosize(e.target); touch();
 });
 edList.addEventListener('keydown', e => {
@@ -750,13 +830,23 @@ edList.addEventListener('keydown', e => {
   }
 });
 edList.addEventListener('click', e => {
-  if (e.target.closest('#clAdd')) return addItem(editing.items.filter(i => !i.done).length ? editing.items.indexOf(editing.items.filter(i=>!i.done).at(-1)) + 1 : editing.items.length);
+  const n = editing;
+  const mt = e.target.closest('.mtab'); if (mt) { edMonth = mt.dataset.m; vib(6); return paintList(); }
+  const yr = e.target.closest('[data-yr]'); if (yr) { const [y, mo] = curMonth(n).split('-').map(Number); edMonth = (y + +yr.dataset.yr) + '-' + pad(mo); return paintList(); }
+  const din = e.target.closest('.dtin'); if (din) { try { din.showPicker(); } catch {} return; }
+  if (e.target.closest('#clAdd')) { const open = n.items.filter(i => !isDone(n, i)); return addItem(open.length ? n.items.indexOf(open.at(-1)) + 1 : n.items.length); }
   const li = e.target.closest('li'); if (!li) return;
-  const idx = editing.items.findIndex(i => i.id === li.dataset.iid);
-  if (e.target.closest('.cb')) { editing.items[idx].done = !editing.items[idx].done; vib(editing.items[idx].done ? [8,40,8] : 6); touch(); paintList(); }
+  const idx = n.items.findIndex(i => i.id === li.dataset.iid);
+  if (e.target.closest('.cb')) { const it = n.items[idx], v = !isDone(n, it); setDone(n, it, v); vib(v ? [8,40,8] : 6); touch(); paintList(); }
   if (e.target.closest('.del')) { editing.items.splice(idx, 1); touch(); paintList(); }
 });
-function addItem(at) { const it = {id:uid(), text:'', done:false}; editing.items.splice(at, 0, it); touch(); paintList(); focusItem(it.id); }
+edList.addEventListener('change', e => {
+  if (!e.target.classList.contains('dtin')) return;
+  const it = editing.items.find(i => i.id === e.target.closest('li').dataset.iid), v = e.target.value;
+  if (editing.monthly) it.day = v ? +v.slice(8, 10) : null; else it.date = v || null;
+  touch(); paintList();
+});
+function addItem(at) { const it = {id:uid(), text:'', done:false, ...(editing.monthly ? {doneM:{}} : {})}; editing.items.splice(at, 0, it); touch(); paintList(); focusItem(it.id); }
 function focusItem(id) { const t = edList.querySelector(`li[data-iid="${id}"] textarea`); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
 
 function toggleType() {
@@ -765,7 +855,7 @@ function toggleType() {
     const lines = n.body.split('\n').map(s => s.replace(/^\s*([-*•]|\d+[.)])\s*/, '').trim()).filter(Boolean);
     n.items = (lines.length ? lines : ['']).map(t => ({id:uid(), text:t, done:false})); n.body = ''; n.type = 'list';
   } else {
-    n.body = n.items.map(i => (i.done ? '✓ ' : '') + i.text).filter(s => s.trim()).join('\n'); n.items = []; n.type = 'text'; edText.value = n.body;
+    n.body = sortItems(n, n.items).map(i => (isDone(n, i) ? '✓ ' : '') + i.text).filter(s => s.trim()).join('\n'); n.items = []; n.monthly = false; edMonth = null; n.type = 'text'; edText.value = n.body;
   }
   touch(); paintEditor(); requestAnimationFrame(() => autosize(edText));
 }
@@ -797,6 +887,7 @@ $('#edArchive').addEventListener('click', () => {
   toast(n.archived ? 'Not arşivlendi' : 'Not arşivden çıkarıldı', 'Geri al', () => { n.archived = !n.archived; persist(); render(); });
 });
 $('#edCheck').addEventListener('click', toggleType);
+$('#edMonthly').addEventListener('click', toggleMonthly);
 $('#edColor').addEventListener('click', colorSheet);
 $('#edTag').addEventListener('click', tagSheet);
 $('#edAlarm').addEventListener('click', alarmSheet);
@@ -1240,7 +1331,7 @@ function confirmSheet(title, sub, cta, fn) {
   sheet.onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; closeSheet(); if (b.dataset.c === '1') fn(); };
 }
 
-const noteText = n => [n.title, n.type === 'draw' ? '(El yazısı not)' : n.type === 'list' ? n.items.map(i => (i.done ? '☑ ' : '☐ ') + i.text).join('\n') : n.body].filter(s => s && s.trim()).join('\n\n');
+const noteText = n => [n.title, n.type === 'draw' ? '(El yazısı not)' : n.type === 'list' ? sortItems(n, n.items).map(i => { const t = itemDate(n, i); return (isDone(n, i) ? '☑ ' : '☐ ') + i.text + (t != null ? ' (' + fmtShort.format(t) + ')' : ''); }).join('\n') : n.body].filter(s => s && s.trim()).join('\n\n');
 
 /* ---------- calendar export ---------- */
 const RR = {daily:'FREQ=DAILY', weekdays:'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', weekly:'FREQ=WEEKLY', monthly:'FREQ=MONTHLY', yearly:'FREQ=YEARLY'};
@@ -1307,7 +1398,7 @@ function advance(ts, rep) {
 }
 async function notify(n) {
   const title = n.title?.trim() || 'Hatırlatma';
-  const body = n.body ? n.body.slice(0, 160) : (n.items?.length ? n.items.filter(i=>!i.done).map(i => '☐ ' + i.text).join('\n').slice(0, 160) : '');
+  const body = n.body ? n.body.slice(0, 160) : (n.items?.length ? sortItems(n, n.items).filter(i => !isDone(n, i)).map(i => '☐ ' + i.text).join('\n').slice(0, 160) : '');
   const opts = {body, tag: 'notlar-' + n.id, icon: 'icons/icon-192.png', badge: 'icons/badge-96.png', vibrate: [300, 120, 300, 120, 600], requireInteraction: true, renotify: true, data: {id: n.id},
     actions: n.id === 'test' ? [] : [{action:'snooze', title:'10 dk ertele'}, {action:'done', title:'Tamam'}]};
   vib([300, 120, 300, 120, 600]);
@@ -1319,7 +1410,7 @@ async function notify(n) {
 function ring(n) {
   if (document.querySelector('.ring')) return;
   const el = document.createElement('div'); el.className = 'ring'; el.setAttribute('role', 'alertdialog');
-  el.innerHTML = `<div class="bell">${ic('bell')}</div><h2>${esc(noteTitle(n))}</h2><p>${esc(n.type === 'list' ? n.items.filter(i=>!i.done).map(i=>'☐ '+i.text).join('\n') : (n.title.trim() ? n.body : n.body.split('\n').slice(1).join('\n')).trim().slice(0, 200))}</p>
+  el.innerHTML = `<div class="bell">${ic('bell')}</div><h2>${esc(noteTitle(n))}</h2><p>${esc(n.type === 'list' ? sortItems(n, n.items).filter(i => !isDone(n, i)).map(i=>'☐ '+i.text).join('\n') : (n.title.trim() ? n.body : n.body.split('\n').slice(1).join('\n')).trim().slice(0, 200))}</p>
     <div class="btns"><button class="btn pri" data-r="done">Tamam</button><button class="btn" data-r="snooze">10 dakika ertele</button><button class="btn" data-r="open">Notu aç</button></div>`;
   document.body.appendChild(el);
   el.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; el.remove(); handleAction(n.id, b.dataset.r); };
